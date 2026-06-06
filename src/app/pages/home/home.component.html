@@ -1,0 +1,64 @@
+<div class="home">
+
+  <!-- LANDSCAPE HEADER con greeting encima -->
+  <div class="home__landscape">
+    <app-landscape-svg [period]="timeOfDay.period" />
+
+    <div class="home__overlay">
+      <div class="home__greeting">
+        <div>
+          <h1 class="home__title">
+            {{ timeOfDay.greeting }} <span>{{ timeOfDay.emoji }}</span>
+          </h1>
+          <p class="home__subtitle">
+            @if (todayCount() > 0) {
+              {{ todayCount() }} task{{ todayCount() === 1 ? '' : 's' }} for today
+            } @else {
+              All caught up today 🎉
+            }
+          </p>
+        </div>
+        <button class="home__bell" aria-label="Notifications">
+          <ion-icon name="notifications-outline"></ion-icon>
+        </button>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- FILTER CHIPS -->
+  <div class="home__chips">
+    <button class="chip" [class.chip--active]="activeChip() === 'all'"   (click)="setChip('all')">All</button>
+    <button class="chip" [class.chip--active]="activeChip() === 'today'" (click)="setChip('today')">Today</button>
+    <button class="chip" [class.chip--active]="activeChip() === 'high'"  (click)="setChip('high')">High Priority</button>
+  </div>
+
+  <!-- TASK LIST -->
+  <div class="home__list">
+    @if (loading()) {
+      @for (i of [1,2,3]; track i) {
+        <app-skeleton-card />
+      }
+    } @else {
+      @let filtered = taskService.tasks() | taskFilter: filters();
+      @if (filtered.length === 0) {
+        <app-empty-state
+          icon="checkmark-done-outline"
+          title="No tasks here"
+          message="Tap + to add your first task" />
+      } @else {
+        @for (task of filtered; track task.id) {
+          <app-task-card
+            [task]="task"
+            (toggled)="toggleTask($event)"
+            (deleted)="deleteTask($event)"
+            (tapped)="openTask($event)" />
+        }
+      }
+    }
+  </div>
+
+  <!-- FAB -->
+  <app-fab-button (clicked)="openCreate()" />
+
+</div>

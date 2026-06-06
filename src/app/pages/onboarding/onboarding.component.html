@@ -1,0 +1,72 @@
+<div class="onboarding-screen" @fadeIn>
+
+  <!-- PARTÍCULAS DE FONDO -->
+  <div class="particles">
+    @for (p of particles; track p.id) {
+      <div class="particle" [style]="p.style"></div>
+    }
+  </div>
+
+  <!-- CONTENIDO -->
+  <div class="onboarding-content">
+
+    <!-- LOGO -->
+    <div class="logo-section">
+      <div class="logo-mark">
+        <span class="logo-icon">✓</span>
+      </div>
+      <h1 class="app-name">Errands & Chores</h1>
+      <p class="app-tagline">Your day, beautifully organized</p>
+    </div>
+
+    <!-- MOCKUP -->
+    <div class="mockup-area">
+      <div class="mockup-card">
+        @for (task of mockTasks; track task.color) {
+          <div class="mockup-task">
+            <div class="mockup-dot" [style.background]="task.color"></div>
+            <div class="mockup-lines">
+              <div class="mockup-line long"></div>
+              <div class="mockup-line short"></div>
+            </div>
+            <div class="mockup-check" [class.done]="task.done">✓</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- SELECTOR DE TEMA -->
+    <div class="theme-section">
+      <p class="theme-label">Choose your style</p>
+
+      <div class="theme-swatches">
+        @for (theme of themeService.themes.slice(0, 5); track theme.id) {
+          <button
+            class="swatch"
+            [class.active]="themeService.currentTheme() === theme.id"
+            [style.background]="theme.vars.bg"
+            [style.border-color]="themeService.currentTheme() === theme.id ? theme.vars.primary : 'transparent'"
+            (click)="selectTheme(theme.id)">
+            <div class="swatch-inner" [style.background]="theme.vars.primary"></div>
+            @if (themeService.currentTheme() === theme.id) {
+              <span class="swatch-check">✓</span>
+            }
+          </button>
+        }
+      </div>
+
+      <p class="theme-name">{{ getThemeName() }}</p>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-section">
+      <button class="btn-get-started" (click)="goToRegister()">
+        Get Started →
+      </button>
+      <button class="btn-sign-in" (click)="goToLogin()">
+        Already have an account? Sign in
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,378 @@
+<div class="detail" @fadeUp>
+
+  <!-- HEADER -->
+  <div class="detail__header">
+    <button class="detail__back" (click)="goBack()">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+      Back
+    </button>
+    <div class="detail__header-actions">
+      <button
+        class="detail__action-btn"
+        (click)="openEdit()"
+        [disabled]="task()!.status === 'completed'">
+        Edit
+      </button>
+      <button class="detail__action-btn detail__action-btn--icon" aria-label="More options">
+        <ion-icon name="ellipsis-vertical"></ion-icon>
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="detail__loading">
+      <div class="shimmer detail__shimmer-title"></div>
+      <div class="shimmer detail__shimmer-line"></div>
+      <div class="shimmer detail__shimmer-line detail__shimmer-line--short"></div>
+    </div>
+  }
+
+  @if (!loading() && task()) {
+    <div class="detail__content">
+      <h1 class="detail__title" [class.detail__title--done]="task()!.status === 'completed'">
+        {{ task()!.title }}
+      </h1>
+      <div class="detail__badges">
+        <span class="detail__status" [class.detail__status--done]="task()!.status === 'completed'">
+          <span class="detail__status-dot"></span>
+          {{ task()!.status === 'completed' ? 'Completed' : 'Pending' }}
+        </span>
+        <app-priority-badge [priority]="task()!.priority" />
+      </div>
+      @if (task()!.description) {
+        <p class="detail__description">{{ task()!.description }}</p>
+      }
+      <div class="detail__divider"></div>
+      @if (task()!.due_date || task()!.due_time) {
+        <div class="detail__meta-row">
+          @if (task()!.due_date) {
+            <div class="detail__meta-chip">
+              <ion-icon name="calendar-outline"></ion-icon>
+              {{ task()!.due_date | relativeDate }}
+            </div>
+          }
+          @if (task()!.due_time) {
+            <div class="detail__meta-chip">
+              <ion-icon name="time-outline"></ion-icon>
+              {{ task()!.due_time | timeFormat }}
+            </div>
+          }
+        </div>
+      }
+      @if (task()!.tags?.length) {
+        <div class="detail__tags-section">
+          <p class="detail__section-label">TAGS</p>
+          <div class="detail__tags">
+            @for (tag of task()!.tags!; track tag.id) {
+              <app-tag-pill [tag]="tag" />
+            }
+          </div>
+        </div>
+      }
+      @if (task()!.photos.length) {
+        <div class="detail__photos-section">
+          <p class="detail__section-label">PHOTOS</p>
+          <div class="detail__photos">
+            @for (photo of task()!.photos; track $index) {
+              <img class="detail__photo" [src]="photo" alt="task photo" />
+            }
+          </div>
+        </div>
+      }
+      <div class="detail__divider"></div>
+      <div class="detail__actions">
+        <button class="detail__btn detail__btn--primary" (click)="markComplete()" [disabled]="saving()">
+          @if (task()!.status === 'completed') {
+            <ion-icon name="refresh-outline"></ion-icon> Reopen Task
+          } @else {
+            <ion-icon name="checkmark-outline"></ion-icon> Mark as Complete ✓
+          }
+        </button>
+        @if (task()!.due_date && task()!.status === 'pending') {
+          <button class="detail__btn detail__btn--outline" (click)="openPostponeModal()" [disabled]="saving()">
+            <ion-icon name="calendar-outline"></ion-icon> Postpone
+          </button>
+        }
+        <button class="detail__btn detail__btn--danger" (click)="openDeleteModal()" [disabled]="saving()">
+          <ion-icon name="trash-outline"></ion-icon> Delete Task
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (!loading() && !task()) {
+    <div class="detail__not-found">
+      <p>Task not found</p>
+      <button (click)="goBack()">Go back</button>
+    </div>
+  }
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: EDIT TASK (pasos)
+═══════════════════════════════════════════════════════════ -->
+@if (showEditModal()) {
+  <div class="modal-overlay modal-overlay--full" (click)="closeEdit()">
+    <div class="edit-modal" (click)="$event.stopPropagation()">
+
+      <!-- Header del modal -->
+      <div class="edit-modal__header">
+        <button class="edit-modal__back" (click)="editBack()">
+          @if (editStep() === 1) {
+            <ion-icon name="close-outline"></ion-icon>
+          } @else {
+            <ion-icon name="arrow-back-outline"></ion-icon>
+          }
+        </button>
+        <span class="edit-modal__title">Edit Task</span>
+        <div class="edit-modal__steps">
+          <span class="edit-modal__step" [class.edit-modal__step--active]="editStep() >= 1"></span>
+          <span class="edit-modal__step" [class.edit-modal__step--active]="editStep() >= 2"></span>
+          <span class="edit-modal__step" [class.edit-modal__step--active]="editStep() >= 3"></span>
+        </div>
+      </div>
+
+      <!-- STEP 1: Título -->
+      @if (editStep() === 1) {
+        <div class="edit-modal__body" @slideIn>
+          <div class="edit-modal__hero">
+            <h2 class="edit-modal__question">Edit your task</h2>
+            <p class="edit-modal__hint">Update the title of your task</p>
+          </div>
+          @if (editErrorMsg()) {
+            <p class="edit-modal__error">{{ editErrorMsg() }}</p>
+          }
+          <div class="edit-modal__input-group">
+            <input
+              class="edit-modal__input"
+              type="text"
+              placeholder="Task title..."
+              [(ngModel)]="editTitle"
+              maxlength="100"
+            />
+            <span class="edit-modal__counter">{{ editTitle.length }}/100</span>
+          </div>
+        </div>
+        <div class="edit-modal__footer">
+          <button class="edit-modal__btn-primary" (click)="editNext()" [disabled]="!editTitle.trim()">
+            Continue <ion-icon name="arrow-forward-outline"></ion-icon>
+          </button>
+        </div>
+      }
+
+      <!-- STEP 2: Descripción -->
+      @if (editStep() === 2) {
+        <div class="edit-modal__body" @slideIn>
+          <div class="edit-modal__hero">
+            <h2 class="edit-modal__question">Add details</h2>
+            <p class="edit-modal__hint">Optional — update your notes</p>
+          </div>
+          <textarea
+            class="edit-modal__textarea"
+            placeholder="Any additional context..."
+            [(ngModel)]="editDescription"
+            rows="5">
+          </textarea>
+        </div>
+        <div class="edit-modal__footer edit-modal__footer--row">
+          <button class="edit-modal__btn-ghost" (click)="editSkip()">Skip</button>
+          <button class="edit-modal__btn-primary" (click)="editNext()">
+            Next <ion-icon name="arrow-forward-outline"></ion-icon>
+          </button>
+        </div>
+      }
+
+      <!-- STEP 3: Detalles finales -->
+      @if (editStep() === 3) {
+        <div class="edit-modal__body edit-modal__body--scroll" @slideIn>
+
+          @if (editErrorMsg()) {
+            <p class="edit-modal__error">{{ editErrorMsg() }}</p>
+          }
+
+          <!-- Prioridad -->
+          <p class="edit-modal__label">PRIORITY</p>
+          <div class="edit-modal__priority-row">
+            <button class="priority-btn priority-btn--high"
+              [class.priority-btn--active]="editPriority() === 'high'"
+              (click)="setEditPriority('high')">
+              <ion-icon name="arrow-up-outline"></ion-icon> HIGH
+            </button>
+            <button class="priority-btn priority-btn--medium"
+              [class.priority-btn--active]="editPriority() === 'medium'"
+              (click)="setEditPriority('medium')">
+              <ion-icon name="remove-outline"></ion-icon> MED
+            </button>
+            <button class="priority-btn priority-btn--low"
+              [class.priority-btn--active]="editPriority() === 'low'"
+              (click)="setEditPriority('low')">
+              <ion-icon name="arrow-down-outline"></ion-icon> LOW
+            </button>
+          </div>
+
+          <!-- Fecha y hora -->
+          <p class="edit-modal__label">DUE DATE</p>
+          <div class="edit-modal__date-row">
+            <div class="edit-modal__date-input" (click)="editDateInput.showPicker()">
+              <ion-icon name="calendar-outline"></ion-icon>
+              <input
+                #editDateInput
+                type="date"
+                [(ngModel)]="editDueDate"
+                [min]="minDate"
+                aria-label="Due date"
+              />
+            </div>
+            <div class="edit-modal__date-input" (click)="editTimeInput.showPicker()">
+              <ion-icon name="time-outline"></ion-icon>
+              <input #editTimeInput type="time" [(ngModel)]="editDueTime" aria-label="Due time" />
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <p class="edit-modal__label">TAGS</p>
+          <div class="edit-modal__tags">
+            @for (tag of availableTags(); track tag.id) {
+              <button class="tag-chip"
+                [class.tag-chip--selected]="isTagSelected(tag.id)"
+                [style.--tag-color]="tag.color"
+                (click)="toggleEditTag(tag.id)">
+                {{ tag.label }}
+              </button>
+            }
+            @for (preset of PRESET_TAGS; track preset.label) {
+              @if (isPresetAvailable(preset.label)) {
+                <button class="tag-chip tag-chip--preset"
+                  (click)="editCustomTagLabel = preset.label; addEditCustomTag()">
+                  {{ preset.label }}
+                </button>
+              }
+            }
+            <button class="tag-chip tag-chip--add" (click)="showEditCustomTag.set(!showEditCustomTag())">
+              <ion-icon name="add-outline"></ion-icon> Other
+            </button>
+          </div>
+          @if (showEditCustomTag()) {
+            <div class="edit-modal__custom-tag">
+              <input class="edit-modal__input" type="text" placeholder="Tag name..."
+                [(ngModel)]="editCustomTagLabel" />
+              <button class="edit-modal__btn-small" (click)="addEditCustomTag()" aria-label="Add tag">
+                Add
+              </button>
+            </div>
+          }
+
+          <!-- Fotos -->
+          <p class="edit-modal__label">PHOTOS</p>
+          <div class="edit-modal__photos">
+            @for (photo of editPhotos(); track $index) {
+              <div class="edit-modal__photo">
+                <img [src]="photo" alt="photo" />
+                <button class="edit-modal__photo-remove" (click)="removeEditPhoto($index)" aria-label="Remove photo">
+                  <ion-icon name="close-outline"></ion-icon>
+                </button>
+              </div>
+            }
+            <label class="edit-modal__photo-add">
+              <ion-icon name="camera-outline"></ion-icon>
+              <span>Add</span>
+              <input type="file" accept="image/*" (change)="pickEditPhoto($event)" hidden />
+            </label>
+          </div>
+
+        </div>
+        <div class="edit-modal__footer">
+          <button class="edit-modal__btn-primary" (click)="saveEdit()" [disabled]="editSaving()" aria-label="Save changes">
+            @if (editSaving()) {
+              <span class="spinner"></span> Saving...
+            } @else {
+              Update Task <ion-icon name="checkmark-outline"></ion-icon>
+            }
+          </button>
+        </div>
+      }
+
+    </div>
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: DELETE
+═══════════════════════════════════════════════════════════ -->
+@if (showDeleteModal()) {
+  <div class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal-sheet" (click)="$event.stopPropagation()">
+      <div class="modal-sheet__icon modal-sheet__icon--danger">
+        <ion-icon name="trash-outline"></ion-icon>
+      </div>
+      <h3 class="modal-sheet__title">Delete Task?</h3>
+      <p class="modal-sheet__body">
+        <strong>{{ task()?.title }}</strong> will be permanently deleted.
+        This action cannot be undone.
+      </p>
+      <div class="modal-sheet__actions">
+        <button class="modal-sheet__btn modal-sheet__btn--ghost" (click)="cancelDelete()">Cancel</button>
+        <button class="modal-sheet__btn modal-sheet__btn--danger" (click)="confirmDelete()" [disabled]="saving()">
+          @if (saving()) { Deleting... } @else { Delete }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: POSTPONE
+═══════════════════════════════════════════════════════════ -->
+@if (showPostponeModal()) {
+  <div class="modal-overlay" (click)="cancelPostpone()">
+    <div class="modal-sheet modal-sheet--postpone" (click)="$event.stopPropagation()">
+
+      <div class="modal-sheet__icon modal-sheet__icon--primary">
+        <ion-icon name="calendar-outline"></ion-icon>
+      </div>
+      <h3 class="modal-sheet__title">Postpone Task</h3>
+      <p class="modal-sheet__subtitle">Pick a new date and time</p>
+
+      <div class="postpone-picker">
+        <p class="postpone-picker__label">DATE</p>
+        <div class="postpone-picker__input" (click)="postponeDateInput.showPicker()">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <input
+          aria-label="Postpone date"
+            #postponeDateInput
+            type="date"
+            [ngModel]="postponeDate()"
+            (ngModelChange)="postponeDate.set($event)"
+            [min]="minDate"
+          />
+        </div>
+      </div>
+
+      <div class="postpone-picker">
+        <p class="postpone-picker__label">
+          TIME <span class="postpone-picker__optional">(optional)</span>
+        </p>
+        <div class="postpone-picker__input" (click)="postponeTimeInput.showPicker()">
+          <ion-icon name="time-outline"></ion-icon>
+          <input
+          aria-label="Postpone time"
+            #postponeTimeInput
+            type="time"
+            [ngModel]="postponeTime()"
+            (ngModelChange)="postponeTime.set($event)"
+          />
+        </div>
+      </div>
+
+      <div class="modal-sheet__actions">
+        <button class="modal-sheet__btn modal-sheet__btn--ghost" (click)="cancelPostpone()">Cancel</button>
+        <button class="modal-sheet__btn modal-sheet__btn--primary" (click)="confirmPostpone()"
+          [disabled]="saving() || !postponeDate()">
+          @if (saving()) { Saving... } @else { Confirm }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

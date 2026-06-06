@@ -1,0 +1,46 @@
+<div
+  class="card"
+  [class.card--completed]="task().status === 'completed'"
+  (click)="tapped.emit(task().id)">
+
+  <div class="card__header">
+    <app-priority-badge [priority]="task().priority" />
+    <button class="card__menu" (click)="$event.stopPropagation()" aria-label="Task options">
+      <ion-icon name="ellipsis-vertical"></ion-icon>
+    </button>
+  </div>
+
+  <div class="card__body">
+    <button
+      aria-label="Toggle task completion"
+      class="card__check"
+      [class.card__check--done]="task().status === 'completed'"
+      (click)="$event.stopPropagation(); toggled.emit(task().id)">
+      <ion-icon [name]="task().status === 'completed' ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+    </button>
+    <div class="card__text">
+      <p class="card__title">{{ task().title }}</p>
+      @if (task().description) {
+        <p class="card__desc">{{ task().description }}</p>
+      }
+    </div>
+  </div>
+
+  <div class="card__footer">
+    <div class="card__tags">
+      @for (tag of task().tags?.slice(0, 2); track tag.id) {
+        <app-tag-pill [tag]="tag" />
+      }
+      @if ((task().tags?.length ?? 0) > 2) {
+        <span class="card__more">+{{ (task().tags?.length ?? 0) - 2 }}</span>
+      }
+    </div>
+
+    @if (task().due_date) {
+      <span class="card__date" [class.card__date--overdue]="isOverdue()" aria-label="Due date">
+        <ion-icon name="calendar-outline"></ion-icon>
+        {{ task().due_date | relativeDate }}
+      </span>
+    }
+  </div>
+</div>

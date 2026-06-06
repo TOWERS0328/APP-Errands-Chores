@@ -1,0 +1,238 @@
+.onboarding-screen {
+  min-height: 100vh;
+  background: var(--color-bg, #fff);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s ease;
+}
+
+// Partículas
+.particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--color-primary, #534AB7);
+}
+
+// Contenido
+.onboarding-content {
+  width: 100%;
+  max-width: 390px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  z-index: 1;
+}
+
+// Logo
+.logo-section {
+  text-align: center;
+}
+
+.logo-mark {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: var(--color-primary, #534AB7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: 0 8px 24px rgba(83, 74, 183, 0.3);
+}
+
+.logo-icon {
+  color: white;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.app-name {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text, #111);
+  letter-spacing: -0.5px;
+  margin: 0 0 8px;
+}
+
+.app-tagline {
+  font-size: 15px;
+  color: var(--color-text-muted, #6B7280);
+  margin: 0;
+}
+
+// Mockup
+.mockup-area {
+  width: 100%;
+}
+
+.mockup-card {
+  background: var(--color-surface, #F8F9FF);
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.mockup-task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--color-bg, #fff);
+  border-radius: 12px;
+}
+
+.mockup-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.mockup-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mockup-line {
+  height: 8px;
+  background: var(--color-border, #E6E7F2);
+  border-radius: 4px;
+
+  &.long  { width: 70%; }
+  &.short { width: 45%; }
+}
+
+.mockup-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border, #E6E7F2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: transparent;
+  transition: all 0.3s ease;
+
+  &.done {
+    background: var(--color-success, #34C759);
+    border-color: var(--color-success, #34C759);
+    color: white;
+  }
+}
+
+// Temas
+.theme-section {
+  text-align: center;
+  width: 100%;
+}
+
+.theme-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted, #6B7280);
+  margin: 0 0 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.theme-swatches {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.swatch {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  padding: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.active {
+    transform: scale(1.15);
+  }
+}
+
+.swatch-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.swatch-check {
+  position: absolute;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.theme-name {
+  font-size: 13px;
+  color: var(--color-primary, #534AB7);
+  font-weight: 600;
+  margin: 0;
+}
+
+// CTA
+.cta-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-get-started {
+  width: 280px;
+  height: 54px;
+  background: var(--color-primary, #534AB7);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(83, 74, 183, 0.3);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  font-family: inherit;
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.btn-sign-in {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted, #6B7280);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px;
+  font-family: inherit;
+}

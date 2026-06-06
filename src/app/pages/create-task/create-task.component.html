@@ -1,0 +1,199 @@
+<div class="create">
+
+  <!-- HEADER -->
+  <div class="create__header">
+    <button class="create__close" (click)="close()" aria-label="Close">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+    <span class="create__title-bar">
+      {{ isEditMode() ? 'Edit Task' : 'New Task' }}
+    </span>
+    <div class="create__steps">
+      <span class="create__step" [class.create__step--active]="step() >= 1"></span>
+      <span class="create__step" [class.create__step--active]="step() >= 2"></span>
+      <span class="create__step" [class.create__step--active]="step() >= 3"></span>
+    </div>
+  </div>
+
+  <!-- STEP 1: TÍTULO -->
+  @if (step() === 1) {
+    <div class="create__body" @slideIn>
+      <div class="create__hero">
+        <h2 class="create__question">
+          {{ isEditMode() ? 'Edit your task' : "What's on your mind?" }}
+        </h2>
+        <p class="create__hint">Give your task a clear, short title</p>
+      </div>
+
+      @if (errorMsg()) {
+        <p class="create__error">{{ errorMsg() }}</p>
+      }
+
+      <div class="create__input-group">
+        <input
+          class="create__input create__input--underline"
+          type="text"
+          placeholder="e.g. Buy groceries"
+          [(ngModel)]="title"
+          maxlength="100"
+          autofocus
+        />
+        <span class="create__counter">{{ title.length }}/100</span>
+      </div>
+    </div>
+
+    <div class="create__footer">
+      <button class="btn-primary" (click)="next()" [disabled]="!title.trim()">
+        Continue <ion-icon name="arrow-forward-outline"></ion-icon>
+      </button>
+    </div>
+  }
+
+  <!-- STEP 2: DESCRIPCIÓN -->
+  @if (step() === 2) {
+    <div class="create__body" @slideIn>
+      <div class="create__hero">
+        <h2 class="create__question">Add more details</h2>
+        <p class="create__hint">Optional — helps you remember what to do</p>
+      </div>
+
+      <textarea
+        class="create__textarea"
+        placeholder="Any additional context, notes, or steps..."
+        [(ngModel)]="description"
+        rows="5"
+      ></textarea>
+    </div>
+
+    <div class="create__footer create__footer--row">
+      <button class="btn-ghost" (click)="skip()">Skip</button>
+      <button class="btn-primary" (click)="next()">
+        Next <ion-icon name="arrow-forward-outline"></ion-icon>
+      </button>
+    </div>
+  }
+
+  <!-- STEP 3: DETALLES FINALES -->
+  @if (step() === 3) {
+    <div class="create__body create__body--scroll" @slideIn>
+      <h2 class="create__section-title">Final details</h2>
+
+      @if (errorMsg()) {
+        <p class="create__error">{{ errorMsg() }}</p>
+      }
+
+      <!-- PRIORIDAD -->
+      <p class="create__label">PRIORITY</p>
+      <div class="create__priority-row">
+        <button
+          class="priority-btn priority-btn--high"
+          [class.priority-btn--active]="priority() === 'high'"
+          (click)="setPriority('high')">
+          <ion-icon name="arrow-up-outline"></ion-icon> HIGH
+        </button>
+        <button
+          class="priority-btn priority-btn--medium"
+          [class.priority-btn--active]="priority() === 'medium'"
+          (click)="setPriority('medium')">
+          <ion-icon name="remove-outline"></ion-icon> MED
+        </button>
+        <button
+          class="priority-btn priority-btn--low"
+          [class.priority-btn--active]="priority() === 'low'"
+          (click)="setPriority('low')">
+          <ion-icon name="arrow-down-outline"></ion-icon> LOW
+        </button>
+      </div>
+
+      <!-- FECHA Y HORA -->
+      <p class="create__label">DUE DATE</p>
+      <div class="create__date-row">
+        <div class="create__date-input" (click)="dateInput.showPicker()">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <input
+            #dateInput
+            type="date"
+            [(ngModel)]="dueDate"
+            aria-label="Select due date"
+          />
+        </div>
+        <div class="create__date-input" (click)="timeInput.showPicker()">
+          <ion-icon name="time-outline"></ion-icon>
+          <input
+            #timeInput
+            type="time"
+            [(ngModel)]="dueTime"
+            aria-label="Select due time"
+          />
+        </div>
+      </div>
+
+      <!-- TAGS -->
+      <p class="create__label">TAGS</p>
+      <div class="create__tags">
+        @for (tag of availableTags(); track tag.id) {
+          <button
+            class="tag-chip"
+            [class.tag-chip--selected]="isTagSelected(tag.id)"
+            [style.--tag-color]="tag.color"
+            (click)="toggleTag(tag.id)">
+            {{ tag.label }}
+          </button>
+        }
+        @for (preset of PRESET_TAGS; track preset.label) {
+          @if (isPresetAvailable(preset.label)) {
+            <button class="tag-chip tag-chip--preset" (click)="customTagLabel = preset.label; addCustomTag()">
+              {{ preset.label }}
+            </button>
+          }
+        }
+        <button class="tag-chip tag-chip--add" (click)="showCustomTag.set(!showCustomTag())">
+          <ion-icon name="add-outline"></ion-icon> Other
+        </button>
+      </div>
+
+      @if (showCustomTag()) {
+        <div class="create__custom-tag">
+          <input
+            class="create__input"
+            type="text"
+            placeholder="Tag name..."
+            [(ngModel)]="customTagLabel"
+          />
+          <button class="btn-small" (click)="addCustomTag()">Add</button>
+        </div>
+      }
+
+      <!-- FOTOS -->
+      <p class="create__label">PHOTOS</p>
+      <div class="create__photos">
+        @for (photo of photos(); track $index) {
+          <div class="create__photo">
+            <img [src]="photo" alt="photo" />
+            <button class="create__photo-remove" (click)="removePhoto($index)" aria-label="Remove photo">
+              <ion-icon name="close-outline"></ion-icon>
+            </button>
+          </div>
+        }
+        <label class="create__photo-add">
+          <ion-icon name="camera-outline"></ion-icon>
+          <span>Add</span>
+          <input type="file" accept="image/*" (change)="pickPhoto($event)" hidden />
+        </label>
+      </div>
+
+    </div>
+
+    <div class="create__footer">
+      <button class="btn-primary" (click)="save()" [disabled]="saving()">
+        @if (saving()) {
+          <span class="spinner"></span> Saving...
+        } @else {
+          {{ isEditMode() ? 'Update Task' : 'Save Task' }}
+          <ion-icon name="checkmark-outline"></ion-icon>
+        }
+      </button>
+    </div>
+  }
+
+</div>

@@ -1,0 +1,6 @@
+<button class="fab" [class.fab--labeled]="label()" (click)="clicked.emit()">
+  <ion-icon [name]="icon()"></ion-icon>
+  @if (label()) {
+    <span>{{ label() }}</span>
+  }
+</button>

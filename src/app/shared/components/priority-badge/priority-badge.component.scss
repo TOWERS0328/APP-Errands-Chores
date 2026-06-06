@@ -1,0 +1,28 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid transparent;
+
+  ion-icon { font-size: 12px; }
+
+  &--high {
+    background: rgba(255, 59, 48, 0.1);
+    color: #FF3B30;
+    border-color: rgba(255, 59, 48, 0.2);
+  }
+  &--medium {
+    background: rgba(255, 149, 0, 0.1);
+    color: #FF9500;
+    border-color: rgba(255, 149, 0, 0.2);
+  }
+  &--low {
+    background: rgba(52, 199, 89, 0.1);
+    color: #34C759;
+    border-color: rgba(52, 199, 89, 0.2);
+  }
+}

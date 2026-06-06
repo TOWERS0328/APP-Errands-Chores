@@ -1,0 +1,15 @@
+@if (!hidden()) {
+  <nav class="bottom-nav">
+    @for (tab of tabs; track tab.path) {
+      <button
+        class="bottom-nav__tab"
+        [class.bottom-nav__tab--active]="isActive(tab.path)"
+        (click)="navigate(tab.path)">
+        <div class="bottom-nav__icon-wrap">
+          <ion-icon [name]="isActive(tab.path) ? tab.iconActive : tab.icon"></ion-icon>
+        </div>
+        <span class="bottom-nav__label">{{ tab.label }}</span>
+      </button>
+    }
+  </nav>
+}

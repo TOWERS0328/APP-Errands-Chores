@@ -1,0 +1,7 @@
+{
+  "name": "errands-chores",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

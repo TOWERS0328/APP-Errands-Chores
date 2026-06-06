@@ -1,0 +1,118 @@
+<div class="register-screen" @fadeIn>
+
+  <div class="register-header">
+    <button class="btn-back" (click)="goBack()" aria-label="Go back">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+    </button>
+    <div class="logo-small">
+      <ion-icon name="checkmark-outline"></ion-icon>
+    </div>
+  </div>
+
+  <div class="register-content">
+    <h1 class="register-title">Create account</h1>
+    <p class="register-subtitle">Start organizing your day beautifully</p>
+
+    @if (errorMsg()) {
+      <div class="error-banner">
+        <ion-icon name="warning-outline"></ion-icon> {{ errorMsg() }}
+      </div>
+    }
+
+    @if (successMsg()) {
+      <div class="success-banner">
+        <ion-icon name="checkmark-circle-outline"></ion-icon> {{ successMsg() }}
+      </div>
+    }
+
+    <div class="form-group">
+      <label class="form-label">Full Name</label>
+      <div class="input-wrapper">
+        <ion-icon name="person-outline" class="input-icon"></ion-icon>
+        <input
+          type="text"
+          class="form-input"
+          placeholder="John Doe"
+          [(ngModel)]="displayName"
+          [disabled]="authService.isLoading()"
+        />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <div class="input-wrapper">
+        <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+        <input
+          type="email"
+          class="form-input"
+          placeholder="you@example.com"
+          [(ngModel)]="email"
+          [disabled]="authService.isLoading()"
+        />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="input-wrapper">
+        <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+        <input
+          [type]="showPassword() ? 'text' : 'password'"
+          class="form-input"
+          placeholder="Min. 6 characters"
+          [(ngModel)]="password"
+          [disabled]="authService.isLoading()"
+        />
+        <button class="input-toggle" (click)="showPassword.set(!showPassword())" aria-label="Toggle password visibility">
+          <ion-icon [name]="showPassword() ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Confirm Password</label>
+      <div class="input-wrapper">
+        <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+        <input
+          [type]="showConfirm() ? 'text' : 'password'"
+          class="form-input"
+          placeholder="Repeat your password"
+          [(ngModel)]="confirmPassword"
+          [disabled]="authService.isLoading()"
+        />
+        <button class="input-toggle" (click)="showConfirm.set(!showConfirm())" aria-label="Toggle confirm password visibility">
+          <ion-icon [name]="showConfirm() ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+    <button
+      class="btn-primary"
+      (click)="signUp()"
+      [disabled]="authService.isLoading()">
+      @if (authService.isLoading()) {
+        <span class="spinner"></span> Creating account...
+      } @else {
+        Create Account <ion-icon name="arrow-forward-outline"></ion-icon>
+      }
+    </button>
+
+    <div class="divider"><span>or continue with</span></div>
+
+    <button class="btn-google" (click)="signInWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 18 18">
+        <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z"/>
+        <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/>
+        <path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 010-3.04V5.41H1.83a8 8 0 000 7.18l2.67-2.07z"/>
+        <path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 001.83 5.4L4.5 7.49a4.77 4.77 0 014.48-3.3z"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <p class="register-footer">
+      Already have an account?
+      <a routerLink="/login" class="link">Sign in</a>
+    </p>
+  </div>
+</div>

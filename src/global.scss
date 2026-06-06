@@ -1,0 +1,152 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/**
+ * Ionic Dark Mode
+ * -----------------------------------------------------
+ * For more info, please see:
+ * https://ionicframework.com/docs/theming/dark-mode
+ */
+
+/* @import "@ionic/angular/css/palettes/dark.always.css"; */
+/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+@import "@ionic/angular/css/palettes/dark.system.css";
+
+/* Notyf notifications styles */
+@import "notyf/notyf.min.css";
+
+/* ─── Alert: Delete confirmation ─────────────────────────────────────────── */
+.delete-alert,
+.postpone-alert {
+
+  .alert-wrapper {
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  }
+
+  .alert-head {
+    padding: 20px 20px 8px;
+  }
+
+  .alert-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--color-text, #111);
+  }
+
+  .alert-sub-title {
+    font-size: 13px;
+    color: var(--color-text-muted, #6B7280);
+    margin-top: 4px;
+  }
+
+  .alert-message {
+    font-size: 14px;
+    color: var(--color-text-muted, #6B7280);
+    padding: 0 20px 12px;
+    line-height: 1.5;
+  }
+
+  /* Inputs inside postpone alert */
+  .alert-input-wrapper {
+    padding: 0 20px;
+    margin-bottom: 8px;
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-muted, #6B7280);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 4px;
+    }
+  }
+
+  .alert-input {
+    border: 1.5px solid var(--color-border, #E6E7F2);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 15px;
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--color-surface, #F8F9FF);
+    color: var(--color-text, #111);
+
+    &:focus {
+      border-color: var(--color-primary, #534AB7);
+      outline: none;
+    }
+  }
+
+  /* Buttons row */
+  .alert-button-group {
+    padding: 8px 16px 16px;
+    display: flex;
+    gap: 8px;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .alert-button {
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    min-width: 90px;
+    padding: 10px 16px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .alert-btn-cancel {
+    --color: var(--color-text-muted, #6B7280);
+    background: var(--color-surface, #F8F9FF);
+    border: 1.5px solid var(--color-border, #E6E7F2);
+  }
+
+  .alert-btn-confirm {
+    --color: #fff;
+    background: var(--color-primary, #534AB7);
+    color: #fff;
+  }
+
+  .alert-btn-danger {
+    --color: #fff;
+    background: #EF4444;
+    color: #fff;
+  }
+}
+
+/* ─── Nav hiding helper ──────────────────────────────────────────────────── */
+/* Utility: add [hidden-nav] attribute to ion-tab-bar to hide it smoothly    */
+ion-tab-bar[style*="display: none"] {
+  pointer-events: none;
+  opacity: 0;
+  height: 0;
+  transition: opacity 0.2s, height 0.2s;
+}

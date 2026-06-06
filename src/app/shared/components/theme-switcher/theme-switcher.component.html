@@ -1,0 +1,12 @@
+<div class="switcher">
+  @for (theme of themes; track theme.id) {
+    <button
+      class="switcher__item"
+      [class.switcher__item--active]="themeService.currentTheme() === theme.id"
+      (click)="themeService.setTheme(theme.id)"
+      [title]="theme.label">
+      <span class="switcher__dot" [style.background]="theme.color"></span>
+      <span class="switcher__label">{{ theme.label }}</span>
+    </button>
+  }
+</div>
