@@ -14,6 +14,7 @@ export interface Task {
   due_time?: string;
   photos: string[];
   tags?: Tag[];
+  reminder_minutes?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -25,4 +26,5 @@ export interface TaskCreate {
   due_date?: string;
   due_time?: string;
   photos?: string[];
+  reminder_minutes?: number | null;
 }

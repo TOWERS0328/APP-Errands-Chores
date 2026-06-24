@@ -24,11 +24,9 @@
         </h2>
         <p class="create__hint">Give your task a clear, short title</p>
       </div>
-
       @if (errorMsg()) {
         <p class="create__error">{{ errorMsg() }}</p>
       }
-
       <div class="create__input-group">
         <input
           class="create__input create__input--underline"
@@ -41,7 +39,6 @@
         <span class="create__counter">{{ title.length }}/100</span>
       </div>
     </div>
-
     <div class="create__footer">
       <button class="btn-primary" (click)="next()" [disabled]="!title.trim()">
         Continue <ion-icon name="arrow-forward-outline"></ion-icon>
@@ -56,7 +53,6 @@
         <h2 class="create__question">Add more details</h2>
         <p class="create__hint">Optional — helps you remember what to do</p>
       </div>
-
       <textarea
         class="create__textarea"
         placeholder="Any additional context, notes, or steps..."
@@ -64,7 +60,6 @@
         rows="5"
       ></textarea>
     </div>
-
     <div class="create__footer create__footer--row">
       <button class="btn-ghost" (click)="skip()">Skip</button>
       <button class="btn-primary" (click)="next()">
@@ -85,20 +80,17 @@
       <!-- PRIORIDAD -->
       <p class="create__label">PRIORITY</p>
       <div class="create__priority-row">
-        <button
-          class="priority-btn priority-btn--high"
+        <button class="priority-btn priority-btn--high"
           [class.priority-btn--active]="priority() === 'high'"
           (click)="setPriority('high')">
           <ion-icon name="arrow-up-outline"></ion-icon> HIGH
         </button>
-        <button
-          class="priority-btn priority-btn--medium"
+        <button class="priority-btn priority-btn--medium"
           [class.priority-btn--active]="priority() === 'medium'"
           (click)="setPriority('medium')">
           <ion-icon name="remove-outline"></ion-icon> MED
         </button>
-        <button
-          class="priority-btn priority-btn--low"
+        <button class="priority-btn priority-btn--low"
           [class.priority-btn--active]="priority() === 'low'"
           (click)="setPriority('low')">
           <ion-icon name="arrow-down-outline"></ion-icon> LOW
@@ -110,65 +102,66 @@
       <div class="create__date-row">
         <div class="create__date-input" (click)="dateInput.showPicker()">
           <ion-icon name="calendar-outline"></ion-icon>
-          <input
-            #dateInput
-            type="date"
-            [(ngModel)]="dueDate"
-            [min]="minDate"
-            aria-label="Select due date"
-          />
+          <input #dateInput type="date" [(ngModel)]="dueDate" [min]="minDate" aria-label="Select due date" />
         </div>
         <div class="create__date-input" (click)="timeInput.showPicker()">
           <ion-icon name="time-outline"></ion-icon>
-          <input
-            #timeInput
-            type="time"
-            [(ngModel)]="dueTime"
-            [min]="minTime"
-            aria-label="Select due time"
-          />
+          <input #timeInput type="time" [(ngModel)]="dueTime" [min]="minTime" aria-label="Select due time" />
         </div>
       </div>
+
+      <!-- REMINDER -->
+      <p class="create__label">REMINDER</p>
+      <div class="create__reminder-row">
+        <button class="reminder-btn" [class.reminder-btn--active]="reminderMinutes() === null" (click)="setReminder(null)">None</button>
+        <button class="reminder-btn" [class.reminder-btn--active]="reminderMinutes() === 5" (click)="setReminder(5)">5 min</button>
+        <button class="reminder-btn" [class.reminder-btn--active]="reminderMinutes() === 15" (click)="setReminder(15)">15 min</button>
+        <button class="reminder-btn" [class.reminder-btn--active]="reminderMinutes() === 30" (click)="setReminder(30)">30 min</button>
+      </div>
+      @if (reminderMinutes() && !dueDate) {
+        <p class="create__reminder-hint">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          Set a due date and time to enable reminders
+        </p>
+      }
+      @if (reminderMinutes() && dueDate && !dueTime) {
+        <p class="create__reminder-hint">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          Set a due time to enable reminders
+        </p>
+      }
+      @if (reminderMinutes() && dueDate && dueTime) {
+        <p class="create__reminder-hint create__reminder-hint--active">
+          <ion-icon name="notifications-outline"></ion-icon>
+          You'll be reminded {{ reminderMinutes() }} min before the task
+        </p>
+      }
 
       <!-- TAGS -->
       <div class="create__label-row">
         <p class="create__label">TAGS</p>
-        <span class="create__tag-counter"
-              [class.create__tag-counter--full]="tagLimitReached()">
+        <span class="create__tag-counter" [class.create__tag-counter--full]="tagLimitReached()">
           {{ selectedTagIds().length }}/{{ MAX_TAGS }}
         </span>
       </div>
-
       @if (tagLimitReached()) {
         <p class="create__tag-limit">
           <ion-icon name="information-circle-outline"></ion-icon>
           Max {{ MAX_TAGS }} tags selected
         </p>
       }
-
-      <!-- Buscador -->
       <div class="create__tag-search">
         <ion-icon name="search-outline"></ion-icon>
-        <input
-          class="create__tag-search-input"
-          type="text"
-          placeholder="e.g. Work, Food, Travel..."
-          [(ngModel)]="tagSearch"
-        />
+        <input class="create__tag-search-input" type="text" placeholder="e.g. Work, Food, Travel..." [(ngModel)]="tagSearch" />
         @if (tagSearch) {
           <button class="create__tag-search-clear" (click)="tagSearch = ''" aria-label="Clear search">
             <ion-icon name="close-circle-outline"></ion-icon>
           </button>
         }
       </div>
-
-      <!-- Chips -->
       <div class="create__tags">
-
-        <!-- Tags ya creados por el usuario -->
         @for (tag of filteredUserTags(); track tag.id) {
-          <button
-            class="tag-chip"
+          <button class="tag-chip"
             [class.tag-chip--selected]="isTagSelected(tag.id)"
             [class.tag-chip--disabled]="tagLimitReached() && !isTagSelected(tag.id)"
             [style.--tag-color]="tag.color"
@@ -177,11 +170,8 @@
             {{ tag.label }}
           </button>
         }
-
-        <!-- Presets del catálogo no creados aún — con su color -->
         @for (preset of filteredPresets(); track preset.label) {
-          <button
-            class="tag-chip tag-chip--preset"
+          <button class="tag-chip tag-chip--preset"
             [class.tag-chip--disabled]="tagLimitReached()"
             [style.--tag-color]="preset.color"
             [disabled]="tagLimitReached()"
@@ -189,24 +179,15 @@
             {{ preset.label }}
           </button>
         }
-
-        <!-- Crear tag personalizado -->
         @if (!tagLimitReached()) {
           <button class="tag-chip tag-chip--add" (click)="showCustomTag.set(!showCustomTag())">
             <ion-icon name="add-outline"></ion-icon> Other
           </button>
         }
       </div>
-
       @if (showCustomTag()) {
         <div class="create__custom-tag">
-          <input
-            class="create__input"
-            type="text"
-            placeholder="Tag name..."
-            [(ngModel)]="customTagLabel"
-            (keyup.enter)="addCustomTag()"
-          />
+          <input class="create__input" type="text" placeholder="Tag name..." [(ngModel)]="customTagLabel" (keyup.enter)="addCustomTag()" />
           <button class="btn-small" (click)="addCustomTag()">Add</button>
         </div>
       }
@@ -222,15 +203,11 @@
             </button>
           </div>
         }
-
-        <!-- Tomar foto con cámara -->
         <label class="create__photo-add" aria-label="Take photo">
           <ion-icon name="camera-outline"></ion-icon>
           <span>Camera</span>
           <input type="file" accept="image/*" capture="environment" (change)="pickPhoto($event)" hidden />
         </label>
-
-        <!-- Elegir de galería -->
         <label class="create__photo-add" aria-label="Choose from gallery">
           <ion-icon name="images-outline"></ion-icon>
           <span>Gallery</span>
