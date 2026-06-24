@@ -1,11 +1,11 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
+import { provideRouter, withPreloading, PreloadAllModules, RouteReuseStrategy } from '@angular/router';
 import { importProvidersFrom } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { RouteReuseStrategy } from '@angular/router';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { AppComponent } from './app/app.component';
 import { AlertController, ModalController, ToastController } from '@ionic/angular/standalone';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { addIcons } from 'ionicons';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import {
@@ -22,15 +22,16 @@ import {
 } from 'ionicons/icons';
 import { appRoutes } from './app/app.routes';
 import { environment } from './environments/environment';
+import { authInterceptor } from './app/core/interceptors/auth-interceptor';
+import { errorInterceptor } from './app/core/interceptors/error-interceptor';
+import { loadingInterceptor } from './app/core/interceptors/loading-interceptor';
 
-// ✅ INICIALIZAR GOOGLE AUTH ANTES de bootstrap
 GoogleAuth.initialize({
   clientId: environment.googleClientId,
   scopes: ['profile', 'email', 'https://www.googleapis.com/auth/calendar'],
   grantOfflineAccess: true,
 });
 
-// Register all icons globally
 addIcons({
   'arrow-back-outline': arrowBackOutline,
   'checkmark-outline': checkmarkOutline,
@@ -73,9 +74,13 @@ bootstrapApplication(AppComponent, {
       BrowserAnimationsModule,
       IonicModule.forRoot({ mode: 'ios' })
     ),
-    provideRouter(
-      appRoutes,
-      withPreloading(PreloadAllModules)
+    provideRouter(appRoutes, withPreloading(PreloadAllModules)),
+    provideHttpClient(
+      withInterceptors([
+        authInterceptor,
+        loadingInterceptor,
+        errorInterceptor,
+      ])
     ),
     ModalController,
     ToastController,
