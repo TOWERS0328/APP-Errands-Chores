@@ -21,10 +21,11 @@ import {
   flagOutline, checkmarkDoneOutline,
 } from 'ionicons/icons';
 import { appRoutes } from './app/app.routes';
+import { environment } from './environments/environment';
 
 // ✅ INICIALIZAR GOOGLE AUTH ANTES de bootstrap
 GoogleAuth.initialize({
-  clientId: '1091663877007-lf0h2ifnri2sumnprb43nmptog03aful.apps.googleusercontent.com',
+  clientId: environment.googleClientId,
   scopes: ['profile', 'email', 'https://www.googleapis.com/auth/calendar'],
   grantOfflineAccess: true,
 });
