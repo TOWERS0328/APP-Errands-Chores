@@ -24,15 +24,11 @@ export class GoogleCalendarService {
     await toast.present();
   }
 
-  // Llamar al abrir el modal de Settings
   async checkConnection() {
     const user = this.authService.currentUser();
     if (!user) return;
-    const { data } = await this.supabase
-      .from('google_calendar_tokens')
-      .select('user_id')
-      .eq('user_id', user.id)
-      .maybeSingle();
+    const { data } = await this.supabase.client
+      .rpc('has_google_calendar_connected');
     this.isConnected.set(!!data);
   }
 
