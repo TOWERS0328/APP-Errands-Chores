@@ -1,3 +1,225 @@
-<p>
-  stats works!
-</p>
+<ion-header class="stats-header" [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      <span class="header-title">Statistics</span>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="stats-content">
+
+  <div class="stats-scroll">
+
+    <!-- ── Streak Card ───────────────────────────── -->
+    <div class="streak-card">
+      <div class="streak-top">
+        <div class="streak-left">
+          <span class="streak-emoji">🔥</span>
+          <div class="streak-info">
+            <span class="streak-number">{{ streak() }}</span>
+            <span class="streak-label">day streak!</span>
+          </div>
+        </div>
+        <span class="streak-motto">Keep it up! 💪</span>
+      </div>
+
+      <!-- Day indicators -->
+      <div class="streak-days">
+        <div
+          *ngFor="let d of streakDays(); trackBy: trackByLabel"
+          class="streak-day"
+          [class.active]="d.active"
+          [class.is-today]="d.isToday"
+        >
+          {{ d.label }}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Weekly Chart ──────────────────────────── -->
+    <div class="section-card">
+      <div class="section-header-row">
+        <p class="section-title">This week</p>
+        <div class="week-nav">
+          <button class="week-nav-btn" (click)="prevWeek()" aria-label="Previous week">
+            <ion-icon name="chevron-back-outline"></ion-icon>
+          </button>
+          <span class="week-nav-label">{{ weekLabel() }}</span>
+          <button class="week-nav-btn" (click)="nextWeek()" aria-label="Next week">
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div
+          *ngFor="let bar of weekBars(); trackBy: trackByLabel"
+          class="bar-col"
+          (click)="openDayTasks(bar)"
+        >
+          <div class="bar-track">
+            <div
+              class="bar-fill"
+              [class.bar-today]="bar.isToday"
+              [style.height.%]="barHeight(bar.count)"
+            ></div>
+          </div>
+          <span class="bar-label" [class.bar-label-today]="bar.isToday">
+            {{ bar.label }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Stats Grid ────────────────────────────── -->
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <span class="stat-number">{{ completedTotal() }}</span>
+        <span class="stat-name">Completed</span>
+        <span class="stat-sub">total</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-number">{{ pendingToday() }}</span>
+        <span class="stat-name">Pending</span>
+        <span class="stat-sub">today</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-number">{{ completionRate() }}%</span>
+        <span class="stat-name">Completion</span>
+        <span class="stat-sub">rate</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-number">{{ avgPerDay() }}</span>
+        <span class="stat-name">Avg/day</span>
+        <span class="stat-sub">tasks</span>
+      </div>
+
+    </div>
+
+    <!-- ── By Category ───────────────────────────── -->
+    <div class="section-card category-section">
+      <p class="section-title">By Category</p>
+
+      <!-- Empty -->
+      <div *ngIf="categoryStats().length === 0" class="category-empty">
+        <span>No tagged tasks yet</span>
+      </div>
+
+      <!-- List -->
+      <div *ngIf="categoryStats().length > 0" class="category-list">
+        <div
+          *ngFor="let cat of categoryStats(); trackBy: trackByLabel"
+          class="category-row"
+        >
+          <!-- Chip -->
+          <span
+            class="cat-chip"
+            [style.background]="cat.color + '22'"
+            [style.color]="cat.color"
+            [style.border-color]="cat.color + '55'"
+          >
+            {{ cat.label }}
+          </span>
+
+          <!-- Progress bar -->
+          <div class="cat-bar-track">
+            <div
+              class="cat-bar-fill"
+              [style.width.%]="categoryWidth(cat)"
+              [style.background]="cat.color"
+            ></div>
+          </div>
+
+          <!-- Fraction -->
+          <span class="cat-fraction">{{ cat.completed }}/{{ cat.total }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom padding for tab bar -->
+    <div style="height: 100px"></div>
+
+  </div><!-- /stats-scroll -->
+
+</ion-content>
+
+<!-- ── Day Tasks Modal ── -->
+<ion-modal
+  [isOpen]="!!selectedDayBar()"
+  (didDismiss)="selectedDayBar.set(null)"
+  class="day-tasks-modal"
+>
+  <ng-template>
+    <div class="modal-content" *ngIf="selectedDayBar() as bar">
+      <div class="modal-handle"></div>
+
+      <div class="modal-header">
+        <div class="modal-title">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <span>{{ formatDate(bar.dateStr) }}</span>
+        </div>
+        <button class="modal-close" (click)="selectedDayBar.set(null)" aria-label="Close">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+
+      <p class="modal-count">
+        {{ dayTasks().length }} {{ dayTasks().length === 1 ? 'task' : 'tasks' }}
+      </p>
+
+      <!-- Empty -->
+      <div *ngIf="dayTasks().length === 0" class="empty-state">
+        <div class="empty-icon">
+          <ion-icon name="calendar-outline"></ion-icon>
+        </div>
+        <p class="empty-title">No tasks</p>
+        <p class="empty-sub">No tasks for this day</p>
+      </div>
+
+      <!-- Task list -->
+      <div class="task-list" *ngIf="dayTasks().length > 0">
+        <div
+          *ngFor="let task of dayTasks(); trackBy: trackByTask"
+          class="task-card"
+          [class.completed]="task.status === 'completed'"
+          [attr.data-priority]="task.priority"
+        >
+          <div class="priority-bar" [style.background]="getPriorityColor(task.priority)"></div>
+          <button
+            class="task-check"
+            [class.checked]="task.status === 'completed'"
+            (click)="toggleTaskStatus(task)"
+            aria-label="Toggle task status"
+          >
+            <ion-icon [name]="task.status === 'completed' ? 'checkmark-circle-outline' : 'ellipse-outline'"></ion-icon>
+          </button>
+          <div class="task-content">
+            <p class="task-title">{{ task.title }}</p>
+            <div class="task-meta">
+              <span class="task-time" *ngIf="task.due_time">
+                <ion-icon name="time-outline"></ion-icon>
+                {{ formatTime(task.due_time) }}
+              </span>
+              <span
+                class="task-priority-chip"
+                [style.background]="getPriorityColor(task.priority) + '22'"
+                [style.color]="getPriorityColor(task.priority)"
+              >
+                {{ getPriorityLabel(task.priority) }}
+              </span>
+              <span class="task-tag" *ngFor="let tag of task.tags?.slice(0,2)">
+                <span class="tag-dot" [style.background]="tag.color"></span>
+                {{ tag.label }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </ng-template>
+</ion-modal>

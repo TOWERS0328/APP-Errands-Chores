@@ -1,0 +1,483 @@
+// ═════════════════════════════════════════════════════════════════════════════
+// SETTINGS COMPONENT SCSS
+// ═════════════════════════════════════════════════════════════════════════════
+
+:host {
+  --set-bg:      var(--color-surface);
+  --set-surface: var(--color-bg);
+  --set-primary: var(--color-primary);
+  --set-text:    var(--color-text);
+  --set-muted:   var(--color-text-muted);
+  --set-border:  var(--color-border);
+  --set-radius:  16px;
+  --set-shadow:  0 2px 16px color-mix(in srgb, var(--color-primary) 6%, transparent);
+}
+
+// ── Scrollbar invisible ───────────────────────────────────────────────────────
+:host, :host * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+:host ::-webkit-scrollbar, :host::-webkit-scrollbar { display: none !important; }
+
+ion-content.settings-content {
+  --background: var(--set-bg);
+  --padding-top: 0;
+  --padding-bottom: 0;
+  scrollbar-width: none !important;
+
+  &::part(scroll) {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  &::part(scroll)::-webkit-scrollbar { display: none !important; }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.settings-header ion-toolbar {
+  --background: var(--set-surface);
+  --border-width: 0;
+  --padding-start: 20px;
+  --padding-end: 20px;
+  box-shadow: 0 1px 0 var(--set-border);
+}
+
+.header-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--set-text);
+  letter-spacing: -0.3px;
+}
+
+// ── Scroll wrapper ────────────────────────────────────────────────────────────
+.settings-scroll {
+  padding: 16px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+// ── Section labels ────────────────────────────────────────────────────────────
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--set-muted);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 18px 4px 8px;
+}
+
+// ── Profile card ──────────────────────────────────────────────────────────────
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--set-surface);
+  border-radius: var(--set-radius);
+  padding: 16px;
+  box-shadow: var(--set-shadow);
+  border: 1px solid var(--set-border);
+  cursor: pointer;
+  transition: transform 0.15s;
+
+  &:active { transform: scale(0.98); }
+}
+
+.avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.avatar-img,
+.avatar-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  background: var(--set-primary);
+  color: var(--color-text-on-primary, #fff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.avatar-cam {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--set-surface);
+  border: 1.5px solid var(--set-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+
+  ion-icon { font-size: 12px; color: var(--set-muted); }
+}
+
+.profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--set-text);
+  margin: 0 0 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-email {
+  font-size: 13px;
+  color: var(--set-muted);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ── Theme grid ────────────────────────────────────────────────────────────────
+.theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.theme-tile {
+  position: relative;
+  border: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: var(--set-shadow);
+  transition: transform 0.15s;
+
+  &:active { transform: scale(0.96); }
+
+  &.selected .theme-swatch {
+    outline: 2.5px solid var(--set-primary);
+    outline-offset: 2px;
+  }
+}
+
+.theme-swatch {
+  height: 72px;
+  border-radius: 14px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.6);
+  flex-shrink: 0;
+}
+
+.theme-name {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px 6px;
+  background: var(--set-surface);
+  border-radius: 0 0 14px 14px;
+}
+
+.theme-check {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon { font-size: 14px; color: var(--set-primary); }
+}
+
+.theme-premium {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon { font-size: 11px; color: #fff; }
+}
+
+// ── Preferences card ──────────────────────────────────────────────────────────
+.pref-card {
+  background: var(--set-surface);
+  border-radius: var(--set-radius);
+  box-shadow: var(--set-shadow);
+  border: 1px solid var(--set-border);
+  overflow: hidden;
+}
+
+.pref-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: default;
+  gap: 12px;
+}
+
+.pref-row-btn {
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:active { background: var(--set-bg); }
+}
+
+.pref-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pref-icon-wrap {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ion-icon { font-size: 18px; }
+}
+
+.pref-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--set-text);
+}
+
+.pref-sublabel {
+  font-size: 12px;
+  color: var(--set-muted);
+  margin: 2px 0 0;
+}
+
+.pref-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.pref-value {
+  font-size: 14px;
+  color: var(--set-muted);
+  white-space: nowrap;
+}
+
+.version-val {
+  font-size: 13px;
+  color: var(--set-muted);
+}
+
+.row-arrow {
+  font-size: 16px;
+  color: var(--set-muted);
+  flex-shrink: 0;
+}
+
+.pref-divider {
+  height: 1px;
+  background: var(--set-border);
+  margin: 0 16px;
+}
+
+// ── Danger zone ───────────────────────────────────────────────────────────────
+.danger-section-label { color: var(--color-danger, #FF3B30); }
+.danger-label         { color: var(--color-danger, #FF3B30) !important; }
+.danger-sublabel      { color: color-mix(in srgb, var(--color-danger, #FF3B30) 70%, transparent); }
+
+// ── Toggle ────────────────────────────────────────────────────────────────────
+.toggle-btn {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--set-border);
+  border: none;
+  cursor: pointer;
+  transition: background 0.25s;
+  flex-shrink: 0;
+  padding: 0;
+
+  &.on { background: var(--set-primary); }
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .toggle-btn.on & { transform: translateX(22px); }
+}
+
+// ── Modal overlay & sheet (mismo patrón que task-detail) ──────────────────────
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: overlayIn 0.2s ease;
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal-sheet {
+  background: var(--color-bg);
+  width: 100%;
+  max-width: 480px;
+  border-radius: 24px 24px 0 0;
+  padding: 28px 24px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  animation: sheetUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  &__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 4px;
+
+    &--danger  { background: rgba(255, 59, 48, 0.1);  color: #FF3B30; }
+    &--primary { background: rgba(83, 74, 183, 0.12); color: var(--color-primary); }
+    &--warning { background: rgba(245, 158, 11, 0.12); color: #F59E0B; }
+  }
+
+  &__title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+    text-align: center;
+  }
+
+  &__body {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    text-align: center;
+    line-height: 1.6;
+    margin: 0;
+
+    strong { color: var(--color-text); font-weight: 600; }
+  }
+
+  &__error {
+    font-size: 13px;
+    color: #EF4444;
+    background: rgba(239, 68, 68, 0.08);
+    padding: 8px 14px;
+    border-radius: 10px;
+    width: 100%;
+    text-align: center;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1.5px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+
+    &:focus { border-color: var(--color-primary); }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  &__btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.15s, transform 0.1s;
+
+    &:active { transform: scale(0.97); }
+    &:disabled { opacity: 0.5; pointer-events: none; }
+
+    &--ghost {
+      background: var(--color-surface);
+      border: 1.5px solid var(--color-border);
+      color: var(--color-text-muted);
+    }
+    &--primary { background: var(--color-primary); color: #fff; }
+    &--danger  { background: #EF4444; color: #fff; }
+  }
+}
+
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}

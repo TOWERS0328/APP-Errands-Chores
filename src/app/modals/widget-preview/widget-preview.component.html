@@ -1,3 +1,52 @@
-<p>
-  widget-preview works!
-</p>
+<!-- src/app/modals/widget-preview/widget-preview.component.html -->
+<ion-header class="widget-header">
+  <ion-toolbar>
+    <ion-title>
+      <div class="title-wrap">
+        <span>Home Screen Widgets</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <button class="close-btn" (click)="close()" aria-label="Close">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="widget-content">
+  <div class="widget-handle"></div>
+
+  <p class="widget-subtitle">Widgets are updated automatically</p>
+
+  <div class="widget-list">
+    <div
+      *ngFor="let widget of widgets()"
+      class="widget-item"
+    >
+      <div class="widget-left">
+        <div class="widget-icon-wrap" [class.enabled]="widget.enabled">
+          <ion-icon [name]="widget.icon"></ion-icon>
+        </div>
+        <div class="widget-info">
+          <span class="widget-title">{{ widget.title }}</span>
+          <span class="widget-desc">{{ widget.description }}</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="toggle-btn"
+        [class.on]="widget.enabled"
+        (click)="toggleWidget(widget.id)"
+        role="switch"
+        [attr.aria-checked]="widget.enabled.toString()"
+        [attr.aria-label]="widget.title"
+        [attr.title]="widget.title"
+
+      >
+        <div class="toggle-thumb"></div>
+      </button>
+    </div>
+  </div>
+</ion-content>

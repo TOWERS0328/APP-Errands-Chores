@@ -26,9 +26,19 @@ export class ProfileService {
     const { data: { user } } = await this.supabase.client.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
+    // Solo enviamos campos que existen en la tabla
+    const safeUpdates: Record<string, any> = {};
+    const allowedFields = ['display_name', 'theme', 'notifications_enabled', 'reminder_time', 'language', 'avatar_url'];
+
+    for (const key of allowedFields) {
+      if (key in updates) safeUpdates[key] = (updates as any)[key];
+    }
+
+    if (Object.keys(safeUpdates).length === 0) return;
+
     const { data, error } = await this.supabase.client
       .from('profiles')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update(safeUpdates)
       .eq('id', user.id)
       .select()
       .single();
@@ -37,24 +47,28 @@ export class ProfileService {
     this.profile.set(data);
   }
 
-  async uploadAvatar(file: File): Promise<string> {
-    const { data: { user } } = await this.supabase.client.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
+ async uploadAvatar(file: File): Promise<string> {
+  const { data: { user } } = await this.supabase.client.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
 
-    const ext = file.name.split('.').pop();
-    const path = `${user.id}/avatar.${ext}`;
+  // Sin query params en el path — Supabase Storage no los acepta
+  const ext = file.name.split('.').pop()?.split('?')[0] ?? 'jpg';
+  const path = `${user.id}/avatar.${ext}`;
 
-    const { error: uploadError } = await this.supabase.client.storage
-      .from('avatars')
-      .upload(path, file, { upsert: true });
+  const { error: uploadError } = await this.supabase.client.storage
+    .from('avatars')
+    .upload(path, file, { upsert: true });
 
-    if (uploadError) throw uploadError;
+  if (uploadError) throw uploadError;
 
-    const { data } = this.supabase.client.storage
-      .from('avatars')
-      .getPublicUrl(path);
+  // Cache busting va en la URL pública, no en el path de storage
+  const { data } = this.supabase.client.storage
+    .from('avatars')
+    .getPublicUrl(path);
 
-    await this.updateProfile({ avatar_url: data.publicUrl });
-    return data.publicUrl;
-  }
+  const publicUrl = `${data.publicUrl}?t=${Date.now()}`;
+
+  await this.updateProfile({ avatar_url: publicUrl });
+  return publicUrl;
+}
 }

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { Notification } from './notification';
+import { Notification } from './notification.service';
 
 describe('Notification', () => {
   let service: Notification;

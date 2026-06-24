@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { IonIcon, IonDatetime } from '@ionic/angular/standalone';
+import { IonIcon } from '@ionic/angular/standalone';
 import { TaskService } from '../../core/services/task';
 import { TagService } from '../../core/services/tag';
 import { SupabaseService } from '../../core/services/supabase';
@@ -14,7 +14,6 @@ import { TagPillComponent } from '../../shared/components/tag-pill/tag-pill.comp
 import { RelativeDatePipe } from '../../shared/pipes/relative-date-pipe';
 import { TimeFormatPipe } from '../../shared/pipes/time-format-pipe';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { Notyf } from 'notyf';
 
 @Component({
   selector: 'app-task-detail',
@@ -23,7 +22,6 @@ import { Notyf } from 'notyf';
     CommonModule,
     FormsModule,
     IonIcon,
-    IonDatetime,
     PriorityBadgeComponent,
     TagPillComponent,
     RelativeDatePipe,
@@ -57,26 +55,34 @@ export class TaskDetailComponent implements OnInit {
   loading = signal(true);
   saving  = signal(false);
 
+  // ── Toast inline (reemplaza notyf) ────────────────────────────────────────
+  toast = signal<{ message: string; type: 'success' | 'warning' | 'error' } | null>(null);
+
   // ── Modal: Delete ─────────────────────────────────────────────────────────
   showDeleteModal = signal(false);
 
   // ── Modal: Postpone ───────────────────────────────────────────────────────
   showPostponeModal = signal(false);
-  postponeDate    = signal('');
-  postponeTime    = signal('');
-  postponeDateISO = signal('');
-  postponeTimeISO = signal('');
+  postponeDate      = signal('');
+  postponeTime      = signal('');
 
   // ── Modal: Edit (pasos) ───────────────────────────────────────────────────
-  showEditModal = signal(false);
-  editStep      = signal(1);
-  editSaving    = signal(false);
-  editErrorMsg  = signal('');
+  showEditModal  = signal(false);
+  editStep       = signal(1);
+  editSaving     = signal(false);
+  editErrorMsg   = signal('');
 
-  // Fecha mínima = hoy (bloquea fechas pasadas)
-  readonly minDate = new Date().toISOString().split('T')[0];
+  readonly minDate = (() => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+})();
 
-  // Campos del formulario de edición
+  get minTime(): string {
+    if (this.editDueDate !== this.minDate) return '';
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  }
+
   editTitle          = '';
   editDescription    = '';
   editPriority       = signal<Priority>('medium');
@@ -99,15 +105,10 @@ export class TaskDetailComponent implements OnInit {
     { label: 'Family',   color: '#FF3B30' },
   ];
 
-  private notyf = new Notyf({
-    duration: 3000,
-    position: { x: 'right', y: 'top' },
-    types: [
-      { type: 'success', background: '#534AB7', icon: { className: 'notyf-icon', tagName: 'span', text: '✅' } },
-      { type: 'warning', background: '#F59E0B', icon: { className: 'notyf-icon', tagName: 'span', text: '📅' } },
-      { type: 'error',   background: '#EF4444', icon: { className: 'notyf-icon', tagName: 'span', text: '🗑️' } }
-    ]
-  });
+  private showToast(message: string, type: 'success' | 'warning' | 'error' = 'success') {
+    this.toast.set({ message, type });
+    setTimeout(() => this.toast.set(null), 2500);
+  }
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -125,20 +126,17 @@ export class TaskDetailComponent implements OnInit {
   goBack() { this.router.navigate(['/home']); }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // EDIT MODAL — solo para tareas pendientes
+  // EDIT MODAL
   // ═══════════════════════════════════════════════════════════════════════════
   async openEdit() {
     const t = this.task();
-    // Guardia: solo tareas pendientes pueden editarse
     if (!t || t.status === 'completed') return;
 
-    // Cargar tags si no están cargados
     if (!this.availableTags().length) {
       const tags = await this.tagService.getTags();
       this.availableTags.set(tags);
     }
 
-    // Pre-cargar datos de la tarea
     this.editTitle       = t.title;
     this.editDescription = t.description ?? '';
     this.editPriority.set(t.priority);
@@ -174,7 +172,6 @@ export class TaskDetailComponent implements OnInit {
   }
 
   setEditPriority(p: Priority) { this.editPriority.set(p); }
-
   isTagSelected(id: string): boolean { return this.editSelectedTagIds().includes(id); }
 
   toggleEditTag(id: string) {
@@ -213,13 +210,41 @@ export class TaskDetailComponent implements OnInit {
     this.editPhotos.update(p => p.filter((_, i) => i !== index));
   }
 
+  private getSelectedDateTime(date: string, time: string): Date | null {
+    if (!date) return null;
+    const [year, month, day] = date.split('-').map(Number);
+    const [hour, minute] = time ? time.split(':').map(Number) : [0, 0];
+
+    if (![year, month, day, hour, minute].every(Number.isFinite)) return null;
+
+    return new Date(year, month - 1, day, hour, minute, 0, 0);
+  }
+
+  private validateEditDateTime(): string | null {
+    if (!this.editDueDate) return null;
+    if (this.editDueDate < this.minDate) return 'Due date cannot be in the past';
+
+    if (this.editDueDate === this.minDate && this.editDueTime) {
+      const now = new Date();
+      const selected = this.getSelectedDateTime(this.editDueDate, this.editDueTime);
+
+      if (!selected) return null;
+
+      if (selected <= now) {
+        this.editErrorMsg.set('That time has already passed. Choose a later time or a future date.');
+        return 'That time has already passed. Choose a later time or a future date.';
+      }
+    }
+    return null;
+  }
+
   async saveEdit() {
     const t = this.task();
     if (!t || !this.editTitle.trim()) return;
 
-    // Validar que la fecha elegida no sea pasada
-    if (this.editDueDate && this.editDueDate < this.minDate) {
-      this.editErrorMsg.set('Due date cannot be in the past');
+    const dateError = this.validateEditDateTime();
+    if (dateError) {
+      this.editErrorMsg.set(dateError);
       return;
     }
 
@@ -234,7 +259,6 @@ export class TaskDetailComponent implements OnInit {
         due_time:    this.editDueTime || undefined,
         photos:      this.editPhotos(),
       });
-      // Reflejar cambios localmente
       this.task.update(task => task ? {
         ...task,
         title:       this.editTitle.trim(),
@@ -245,7 +269,7 @@ export class TaskDetailComponent implements OnInit {
         photos:      this.editPhotos(),
       } : task);
       this.showEditModal.set(false);
-      this.notyf.success('Task updated successfully!');
+      this.showToast('Task updated', 'success');
     } catch (e: any) {
       this.editErrorMsg.set(e.message);
     } finally {
@@ -264,37 +288,23 @@ export class TaskDetailComponent implements OnInit {
     await this.taskService.updateTask(t.id, { status: newStatus });
     this.task.update(task => task ? { ...task, status: newStatus } : task);
     this.saving.set(false);
-    if (newStatus === 'completed') {
-      this.notyf.success('Task marked as completed!');
-    } else {
-      (this.notyf as any).open({ type: 'warning', message: 'Task reopened' });
-    }
+    this.showToast(
+      newStatus === 'completed' ? 'Task completed ✓' : 'Task reopened',
+      newStatus === 'completed' ? 'success' : 'warning'
+    );
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // POSTPONE MODAL
   // ═══════════════════════════════════════════════════════════════════════════
   openPostponeModal() {
-  const t = this.task();
-  if (!t?.due_date) return;
-  const nextDay = new Date(t.due_date);
-  nextDay.setDate(nextDay.getDate() + 1);
-  this.postponeDate.set(nextDay.toISOString().split('T')[0]);
-  this.postponeTime.set(t.due_time ?? '');
-  this.showPostponeModal.set(true);
-}
-
-  onDateChange(event: any) {
-    const val: string = event.detail.value;
-    if (val) this.postponeDate.set(val.split('T')[0]);
-  }
-
-  onTimeChange(event: any) {
-    const val: string = event.detail.value;
-    if (val) {
-      const timePart = val.includes('T') ? val.split('T')[1].substring(0, 5) : val.substring(0, 5);
-      this.postponeTime.set(timePart);
-    }
+    const t = this.task();
+    if (!t?.due_date) return;
+    const nextDay = new Date(t.due_date);
+    nextDay.setDate(nextDay.getDate() + 1);
+    this.postponeDate.set(nextDay.toISOString().split('T')[0]);
+    this.postponeTime.set(t.due_time ?? '');
+    this.showPostponeModal.set(true);
   }
 
   async confirmPostpone() {
@@ -308,7 +318,7 @@ export class TaskDetailComponent implements OnInit {
     this.saving.set(false);
     this.showPostponeModal.set(false);
     const timeStr = this.postponeTime() ? ` at ${this.postponeTime()}` : '';
-    (this.notyf as any).open({ type: 'warning', message: `Task postponed to ${this.postponeDate()}${timeStr}` });
+    this.showToast(`Postponed to ${this.postponeDate()}${timeStr}`, 'warning');
   }
 
   cancelPostpone() { this.showPostponeModal.set(false); }
@@ -325,7 +335,6 @@ export class TaskDetailComponent implements OnInit {
     this.saving.set(true);
     await this.taskService.deleteTask(t.id);
     this.showDeleteModal.set(false);
-    this.notyf.error('Task deleted');
     this.router.navigate(['/home']);
   }
 }

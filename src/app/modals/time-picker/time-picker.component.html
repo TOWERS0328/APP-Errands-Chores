@@ -1,3 +1,41 @@
-<p>
-  time-picker works!
-</p>
+<ion-header class="modal-header-bar">
+  <ion-toolbar>
+    <ion-title>
+      <div class="modal-title">
+        <ion-icon name="time-outline" class="modal-title-icon"></ion-icon>
+        <span>Reminder Time</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="start">
+      <button class="modal-btn-icon modal-btn-close" (click)="close()" aria-label="Close">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <button class="modal-btn-icon modal-btn-confirm" (click)="confirm()" aria-label="Save time">
+        <ion-icon name="checkmark-outline"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="time-content">
+  <div class="modal-handle"></div>
+
+  <p class="modal-subtitle">Choose when you want to receive daily reminders</p>
+
+  <div class="time-picker-wrap" style="display: flex; justify-content: center; padding: 0 16px;">
+    <ion-datetime
+      presentation="time"
+      [value]="selectedTime()"
+      (ionChange)="setTime($event)"
+      class="custom-time-picker"
+      prefer-wheel="true"
+    ></ion-datetime>
+  </div>
+
+  <div class="time-preview" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 24px; padding: 16px; background: var(--color-surface); border-radius: 16px; margin: 24px 16px 0;">
+    <span style="font-size: 14px; color: var(--color-text-muted);">Selected time:</span>
+    <span style="font-size: 18px; font-weight: 700; color: var(--color-primary); font-variant-numeric: tabular-nums;">{{ selectedTime() }}</span>
+  </div>
+</ion-content>

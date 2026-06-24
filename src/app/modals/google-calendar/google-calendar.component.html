@@ -1,0 +1,78 @@
+<div class="modal-content">
+
+  <!-- Handle -->
+  <div class="modal-handle"></div>
+
+  <!-- Header (mismo patrón que profile-edit) -->
+  <div class="gc-header">
+    <button class="modal-btn-icon modal-btn-close" (click)="close()" aria-label="Close">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+    <h2 class="gc-header-title">Google Calendar</h2>
+    <div style="width: 40px;"></div>
+  </div>
+
+  <!-- Hero: logo + status -->
+  <div class="gc-hero">
+    <div class="gc-logo-wrap" [class.connected]="gcal.isConnected()">
+      <ion-icon name="logo-google"></ion-icon>
+    </div>
+    <p class="gc-status-label" [class.connected]="gcal.isConnected()">
+      <ion-icon
+        [name]="gcal.isConnected() ? 'checkmark-circle-outline' : 'alert-circle-outline'">
+      </ion-icon>
+      {{ gcal.isConnected() ? 'Connected' : 'Not connected' }}
+    </p>
+    <p class="gc-status-desc">
+      {{ gcal.isConnected()
+          ? 'Your Google Calendar is synced with your tasks.'
+          : 'Connect your Google Calendar to see events alongside your tasks.' }}
+    </p>
+  </div>
+
+  <!-- Actions -->
+  <div class="gc-actions">
+
+    <!-- CONNECT -->
+    <button
+      *ngIf="!gcal.isConnected()"
+      class="g-connect-btn"
+      (click)="connect()"
+      [disabled]="gcal.isConnecting()"
+    >
+      <ng-container *ngIf="!gcal.isConnecting()">
+        <div class="g-connect-icon">
+          <ion-icon name="logo-google"></ion-icon>
+        </div>
+        Connect with Google
+      </ng-container>
+      <ion-spinner *ngIf="gcal.isConnecting()" name="crescent"></ion-spinner>
+    </button>
+
+    <p class="g-hint" *ngIf="!gcal.isConnected()">
+      You'll be asked to choose a Google account and grant calendar access.
+    </p>
+
+    <!-- SYNC + DISCONNECT -->
+    <ng-container *ngIf="gcal.isConnected()">
+      <button
+        class="g-sync-btn"
+        (click)="sync()"
+        [disabled]="gcal.isSyncing()"
+      >
+        <ng-container *ngIf="!gcal.isSyncing()">
+          <ion-icon name="sync-outline"></ion-icon>
+          Sync now
+        </ng-container>
+        <ion-spinner *ngIf="gcal.isSyncing()" name="crescent"></ion-spinner>
+      </button>
+
+      <button class="g-disconnect-btn" (click)="disconnect()">
+        <ion-icon name="trash-outline"></ion-icon>
+        Disconnect
+      </button>
+    </ng-container>
+
+  </div>
+
+</div>

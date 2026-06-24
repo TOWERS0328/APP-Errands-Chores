@@ -1,42 +1,35 @@
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { AppModule } from './app/app.module';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
+import { importProvidersFrom } from '@angular/core';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouteReuseStrategy } from '@angular/router';
+import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
+import { AppComponent } from './app/app.component';
+import { AlertController, ModalController, ToastController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import {
-  arrowBackOutline,
-  checkmarkOutline,
-  warningOutline,
-  mailOutline,
-  lockClosedOutline,
-  eyeOutline,
-  eyeOffOutline,
-  arrowForwardOutline,
-  personOutline,
-  callOutline,
-  logoGoogle,
-  closeOutline,
-  checkmarkCircleOutline,
-  alertCircleOutline,
-  homeOutline,
-  calendarOutline,
-  addOutline,
-  statsChartOutline,
-  settingsOutline,
-  notificationsOutline,
-  trashOutline,
-  createOutline,
-  ellipsisVertical,
-  chevronForwardOutline,
-  chevronBackOutline,
-  searchOutline,
-  filterOutline,
-  starOutline,
-  star,
-  heartOutline,
-  timeOutline,
-  flagOutline,
-  checkmarkDoneOutline,
+  arrowBackOutline, checkmarkOutline, warningOutline,
+  mailOutline, lockClosedOutline, eyeOutline, eyeOffOutline,
+  arrowForwardOutline, personOutline, callOutline, logoGoogle,
+  closeOutline, checkmarkCircleOutline, alertCircleOutline,
+  homeOutline, calendarOutline, addOutline, statsChartOutline,
+  settingsOutline, notificationsOutline, trashOutline,
+  createOutline, ellipsisVertical, chevronForwardOutline,
+  chevronBackOutline, searchOutline, filterOutline,
+  starOutline, star, heartOutline, timeOutline,
+  flagOutline, checkmarkDoneOutline,
 } from 'ionicons/icons';
+import { appRoutes } from './app/app.routes';
 
+// ✅ INICIALIZAR GOOGLE AUTH ANTES de bootstrap
+GoogleAuth.initialize({
+  clientId: '1091663877007-lf0h2ifnri2sumnprb43nmptog03aful.apps.googleusercontent.com',
+  scopes: ['profile', 'email', 'https://www.googleapis.com/auth/calendar'],
+  grantOfflineAccess: true,
+});
+
+// Register all icons globally
 addIcons({
   'arrow-back-outline': arrowBackOutline,
   'checkmark-outline': checkmarkOutline,
@@ -73,5 +66,19 @@ addIcons({
   'checkmark-done-outline': checkmarkDoneOutline,
 });
 
-platformBrowserDynamic().bootstrapModule(AppModule)
-  .catch(err => console.log(err));
+bootstrapApplication(AppComponent, {
+  providers: [
+    importProvidersFrom(
+      BrowserAnimationsModule,
+      IonicModule.forRoot({ mode: 'ios' })
+    ),
+    provideRouter(
+      appRoutes,
+      withPreloading(PreloadAllModules)
+    ),
+    ModalController,
+    ToastController,
+    AlertController,
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+  ]
+}).catch(err => console.error(err));

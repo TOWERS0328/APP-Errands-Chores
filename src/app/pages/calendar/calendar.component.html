@@ -1,3 +1,266 @@
-<p>
-  calendar works!
-</p>
+<ion-header class="cal-header" [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      <span class="header-title">Calendar</span>
+    </ion-title>
+    <ion-buttons slot="end">
+      <button class="today-btn" (click)="goToToday()" aria-label="Go to today">
+        Today
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="cal-content">
+
+  <!-- Month navigation -->
+  <div class="month-nav">
+    <button class="nav-arrow" (click)="prevMonth()" aria-label="Previous month">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+    </button>
+    <h2 class="month-label">{{ currentMonthLabel() }}</h2>
+    <button class="nav-arrow" (click)="nextMonth()" aria-label="Next month">
+      <ion-icon name="chevron-forward-outline"></ion-icon>
+    </button>
+  </div>
+
+  <!-- Calendar grid -->
+  <div class="calendar-grid">
+    <div class="week-header">
+      <span *ngFor="let d of weekDays" class="week-day">{{ d }}</span>
+    </div>
+    <div class="days-grid">
+      <button
+        *ngFor="let day of calendarDays(); trackBy: trackByDay"
+        class="day-cell"
+        [class.other-month]="!day.isCurrentMonth"
+        [class.today]="day.isToday"
+        [class.selected]="day.isSelected"
+        [class.has-tasks]="day.taskCount > 0"
+        (click)="selectDay(day)"
+      >
+        <span class="day-number">{{ day.day }}</span>
+        <div class="task-dots" *ngIf="day.taskCount > 0">
+          <span class="dot pending"   *ngIf="day.hasPending"></span>
+          <span class="dot completed" *ngIf="day.hasCompleted"></span>
+        </div>
+        <span class="day-badge" *ngIf="day.taskCount > 1">{{ day.taskCount }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span class="legend-item"><span class="dot pending"></span> Pending</span>
+    <span class="legend-item"><span class="dot completed"></span> Completed</span>
+  </div>
+
+  <!-- Tasks section -->
+  <div class="tasks-section">
+
+    <div class="section-header">
+      <div>
+        <h3 class="section-title">{{ selectedDateLabel() }}</h3>
+        <p class="section-count">
+          {{ selectedDateTasks().length }}
+          {{ selectedDateTasks().length === 1 ? 'task' : 'tasks' }}
+        </p>
+      </div>
+    </div>
+
+    <!-- ── Search funcional ── -->
+    <div class="search-box" [class.search-box--active]="searchQuery()">
+      <ion-icon name="search-outline" class="search-icon"></ion-icon>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search tasks..."
+        [value]="searchQuery()"
+        (input)="onSearch($event)"
+      />
+      <button
+        *ngIf="searchQuery()"
+        class="search-clear"
+        (click)="searchQuery.set('')"
+        aria-label="Clear search"
+      >
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Priority filter -->
+    <div class="filter-chips">
+      <button
+        *ngFor="let f of filterOptions"
+        class="chip"
+        [class.active]="priorityFilter() === f.k"
+        [attr.data-priority]="f.k"
+        (click)="setFilter(f.k)"
+      >
+        {{ f.l }}
+      </button>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="selectedDateTasks().length === 0" class="empty-state">
+      <div class="empty-icon">
+        <ion-icon name="calendar-outline"></ion-icon>
+      </div>
+      <p class="empty-title">No tasks</p>
+      <p class="empty-sub">{{ searchQuery() ? 'No tasks match your search' : 'No tasks for this day' }}</p>
+    </div>
+
+    <!-- Task cards -->
+    <div class="task-list" *ngIf="selectedDateTasks().length > 0">
+      <div
+        *ngFor="let task of selectedDateTasks(); trackBy: trackByTask"
+        class="task-card"
+        [class.completed]="task.status === 'completed'"
+        [attr.data-priority]="task.priority"
+        (click)="openTaskDetail(task)"
+      >
+        <div class="priority-bar" [style.background]="getPriorityColor(task.priority)"></div>
+        <button
+         aria-label="Toggle task status"
+          class="task-check"
+          [class.checked]="task.status === 'completed'"
+          (click)="$event.stopPropagation(); toggleTaskStatus(task)"
+        >
+          <ion-icon [name]="task.status === 'completed' ? 'checkmark-circle-outline' : 'ellipse-outline'"></ion-icon>
+        </button>
+        <div class="task-content">
+          <p class="task-title">{{ task.title }}</p>
+          <div class="task-meta">
+            <span class="task-time" *ngIf="task.due_time">
+              <ion-icon name="time-outline"></ion-icon>
+              {{ formatTime(task.due_time) }}
+            </span>
+            <span
+              class="task-priority-chip"
+              [style.background]="getPriorityColor(task.priority) + '22'"
+              [style.color]="getPriorityColor(task.priority)"
+            >
+              {{ getPriorityLabel(task.priority) }}
+            </span>
+            <span class="task-tag" *ngFor="let tag of task.tags?.slice(0,2)">
+              <span class="tag-dot" [style.background]="tag.color"></span>
+              {{ tag.label }}
+            </span>
+          </div>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="task-arrow"></ion-icon>
+      </div>
+    </div>
+
+  </div>
+
+</ion-content>
+
+<!-- ── Task Detail Modal ── -->
+<ion-modal
+  [isOpen]="!!showTaskDetail()"
+  (didDismiss)="closeTaskDetail()"
+  [initialBreakpoint]="0.75"
+  [breakpoints]="[0, 0.5, 0.75, 1]"
+  class="task-detail-modal"
+>
+  <ng-template>
+    <div class="modal-content" *ngIf="showTaskDetail() as task">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div
+          class="modal-priority-badge"
+          [style.background]="getPriorityColor(task.priority) + '22'"
+          [style.color]="getPriorityColor(task.priority)"
+        >
+          <ion-icon [name]="getPriorityIcon(task.priority)"></ion-icon>
+          {{ getPriorityLabel(task.priority) }} Priority
+        </div>
+        <button class="modal-close" (click)="closeTaskDetail()"
+          aria-label="Close task detail">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+      <div class="modal-title-wrap">
+        <button
+          class="modal-check"
+          [class.checked]="task.status === 'completed'"
+          (click)="toggleTaskStatus(task)"
+          aria-label="Toggle task status"
+        >
+          <ion-icon [name]="task.status === 'completed' ? 'checkmark-circle-outline' : 'ellipse-outline'"></ion-icon>
+        </button>
+        <h2 class="modal-task-title" [class.done]="task.status === 'completed'">{{ task.title }}</h2>
+      </div>
+      <div class="modal-status" [class.is-done]="task.status === 'completed'">
+        {{ task.status === 'completed' ? '✓ Completed' : '⏳ Pending' }}
+      </div>
+      <div class="modal-details">
+        <div class="detail-item" *ngIf="task.due_date">
+          <ion-icon name="calendar-outline" class="detail-icon"></ion-icon>
+          <div>
+            <p class="detail-label">Date</p>
+            <p class="detail-value">{{ formatDate(task.due_date) }}</p>
+          </div>
+        </div>
+        <div class="detail-item" *ngIf="task.due_time">
+          <ion-icon name="time-outline" class="detail-icon"></ion-icon>
+          <div>
+            <p class="detail-label">Time</p>
+            <p class="detail-value">{{ formatTime(task.due_time) }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-description" *ngIf="task.description">
+        <div class="desc-header">
+          <ion-icon name="document-text-outline"></ion-icon>
+          <span>Description</span>
+        </div>
+        <p class="desc-text">{{ task.description }}</p>
+      </div>
+      <div class="modal-tags" *ngIf="task.tags && task.tags.length > 0">
+        <div class="desc-header">
+          <ion-icon name="pricetag-outline"></ion-icon>
+          <span>Tags</span>
+        </div>
+        <div class="tags-wrap">
+          <span
+            *ngFor="let tag of task.tags"
+            class="modal-tag"
+            [style.background]="tag.color + '22'"
+            [style.color]="tag.color"
+            [style.border-color]="tag.color + '44'"
+          >
+            <span class="tag-dot" [style.background]="tag.color"></span>
+            {{ tag.label }}
+          </span>
+        </div>
+      </div>
+      <div class="modal-photos" *ngIf="task.photos && task.photos.length > 0">
+        <div class="desc-header">
+          <ion-icon name="image-outline"></ion-icon>
+          <span>Photos ({{ task.photos.length }})</span>
+        </div>
+        <div class="photos-grid">
+          <div *ngFor="let photo of task.photos.slice(0, 4)" class="photo-thumb">
+            <img [src]="photo" alt="photo" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button
+          class="action-btn complete-btn"
+          (click)="toggleTaskStatus(task)"
+          [class.reopen]="task.status === 'completed'"
+        >
+          <ion-icon [name]="task.status === 'completed' ? 'ellipse-outline' : 'checkmark-circle-outline'"></ion-icon>
+          {{ task.status === 'completed' ? 'Reopen' : 'Complete' }}
+        </button>
+        <button class="action-btn delete-btn" (click)="deleteTask(task)">
+          <ion-icon name="trash-outline"></ion-icon>
+          Delete
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

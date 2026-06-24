@@ -1,8 +1,9 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { IonIcon } from '@ionic/angular/standalone';
 import { filter } from 'rxjs/operators';
+import { NavVisibilityService } from '../../../core/services/nav-visibility';
 
 @Component({
   selector: 'app-bottom-nav',
@@ -13,8 +14,10 @@ import { filter } from 'rxjs/operators';
 })
 export class BottomNavComponent {
   private router = inject(Router);
+  private navVisibility = inject(NavVisibilityService);
 
-  hidden = signal(false);
+  private routeHidden = signal(false);
+  hidden = computed(() => this.routeHidden() || this.navVisibility.forceHidden());
 
   // Rutas donde el nav debe ocultarse
   private hiddenRoutes = [
@@ -27,7 +30,7 @@ export class BottomNavComponent {
       filter(e => e instanceof NavigationEnd)
     ).subscribe((e: any) => {
       const url: string = e.urlAfterRedirects ?? e.url;
-      this.hidden.set(this.hiddenRoutes.some(r => url.startsWith(r)));
+      this.routeHidden.set(this.hiddenRoutes.some(r => url.startsWith(r)));
     });
   }
 

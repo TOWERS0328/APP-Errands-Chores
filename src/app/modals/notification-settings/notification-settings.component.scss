@@ -1,0 +1,293 @@
+// src/app/modals/notification-settings/notification-settings.component.scss
+:host {
+  display: block;
+}
+
+.notif-header {
+  ion-toolbar {
+    --background: transparent;
+    --border-width: 0;
+    padding-top: 8px;
+  }
+
+  .title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .title-icon {
+    font-size: 20px;
+    color: var(--color-primary);
+  }
+
+  .close-btn,
+  .confirm-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+
+    &:active {
+      background: var(--color-surface);
+    }
+
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+
+  .close-btn {
+    color: var(--color-text-muted);
+  }
+
+  .confirm-btn {
+    color: var(--color-primary);
+  }
+}
+
+.notif-content {
+  --background: var(--color-bg);
+}
+
+.notif-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 4px;
+  margin: 8px auto 16px;
+}
+
+.notif-subtitle {
+  margin: 0 20px 24px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.notif-section {
+  margin: 0 16px 20px;
+  padding: 16px;
+  background: var(--color-surface);
+  border-radius: 20px;
+  border: 1.5px solid var(--color-border);
+}
+
+.section-title {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.section-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.channel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.channel-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: var(--color-bg);
+  border-radius: 14px;
+}
+
+.channel-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.channel-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 20px;
+    color: var(--color-primary);
+  }
+
+  &.enabled {
+    background: var(--color-primary);
+
+    ion-icon {
+      color: white;
+    }
+  }
+}
+
+.channel-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.channel-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.channel-desc {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+// Toggle switch
+.toggle-btn {
+  width: 50px;
+  height: 30px;
+  border-radius: 15px;
+  background: var(--color-border);
+  border: none;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  padding: 0;
+  flex-shrink: 0;
+
+  .toggle-thumb {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: white;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.25s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  &.on {
+    background: var(--color-primary);
+
+    .toggle-thumb {
+      transform: translateX(20px);
+    }
+  }
+}
+
+// Quiet Hours
+.quiet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.quiet-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quiet-icon {
+  font-size: 22px;
+  color: var(--color-warning);
+}
+
+.quiet-hours-grid {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: opacity 0.2s;
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
+.time-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.time-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.time-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.time-separator {
+  font-size: 18px;
+  color: var(--color-text-muted);
+  font-weight: 700;
+  padding-top: 20px;
+}
+
+// Info
+.notif-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 20px 24px;
+  padding: 14px;
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 15%, transparent);
+
+  ion-icon {
+    font-size: 18px;
+    color: var(--color-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+  }
+}

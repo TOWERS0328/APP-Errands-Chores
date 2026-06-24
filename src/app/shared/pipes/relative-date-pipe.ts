@@ -5,7 +5,13 @@ export class RelativeDatePipe implements PipeTransform {
   transform(value: string | Date | null | undefined): string {
     if (!value) return '';
 
-    const date = typeof value === 'string' ? new Date(value) : value;
+    const date = typeof value === 'string'
+      ? (() => {
+          const [y, m, d] = value.split('-').map(Number);
+          return new Date(y, m - 1, d); // hora local, no UTC
+        })()
+      : value;
+
     const now  = new Date();
 
     const startOfDay = (d: Date) =>

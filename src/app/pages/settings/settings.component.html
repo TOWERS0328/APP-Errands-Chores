@@ -1,3 +1,376 @@
-<p>
-  settings works!
-</p>
+<ion-header class="settings-header" [translucent]="true">
+  <ion-toolbar>
+    <ion-title><span class="header-title">Settings</span></ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="settings-content">
+
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="settings-scroll">
+
+    <!-- ══ PROFILE CARD ════════════════════════════════════════════════ -->
+    <div class="profile-card" (click)="editProfile()">
+      <div class="avatar-wrap">
+        <img *ngIf="avatarUrl()" [src]="avatarUrl()!" class="avatar-img" alt="avatar" />
+        <div *ngIf="!avatarUrl()" class="avatar-placeholder">
+          {{ avatarLetter() }}
+        </div>
+        <button class="avatar-cam" (click)="$event.stopPropagation(); editProfile()" aria-label="Change avatar">
+          <ion-icon name="camera-outline"></ion-icon>
+        </button>
+      </div>
+      <div class="profile-info">
+        <ng-container *ngIf="!isLoading(); else skelName">
+          <p class="profile-name">{{ displayName() }}</p>
+          <p class="profile-email">{{ userEmail() }}</p>
+        </ng-container>
+        <ng-template #skelName>
+          <ion-skeleton-text [animated]="true" style="width:120px;height:16px;border-radius:8px;margin-bottom:6px"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width:180px;height:13px;border-radius:8px"></ion-skeleton-text>
+        </ng-template>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+    </div>
+
+    <!-- ══ APPEARANCE ══════════════════════════════════════════════════ -->
+    <div class="section-label">APPEARANCE</div>
+    <div class="theme-grid">
+      <button
+        *ngFor="let theme of themes; trackBy: trackById"
+        class="theme-tile"
+        [class.selected]="activeTheme() === theme.id"
+        (click)="selectTheme(theme)"
+        [attr.aria-label]="theme.name"
+      >
+        <ng-container *ngIf="theme.id === 'custom'; else normalSwatch">
+          <div class="theme-swatch theme-swatch-custom">
+            <div class="custom-palette">
+              <span class="cp-dot" style="background:#FF6B6B"></span>
+              <span class="cp-dot" style="background:#4ECDC4"></span>
+              <span class="cp-dot" style="background:#FFE66D"></span>
+              <span class="cp-dot" style="background:#A855F7"></span>
+            </div>
+            <div *ngIf="activeTheme() === theme.id" class="theme-check">
+              <ion-icon name="checkmark-outline"></ion-icon>
+            </div>
+            <div class="theme-premium">
+              <ion-icon name="color-palette-outline"></ion-icon>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-template #normalSwatch>
+          <div
+            class="theme-swatch"
+            [style.background]="'linear-gradient(135deg, ' + theme.vars.bg + ' 0%, ' + theme.vars.primary + ' 100%)'"
+          >
+            <span class="theme-dot" [style.background]="theme.vars.primary"></span>
+            <div *ngIf="activeTheme() === theme.id" class="theme-check">
+              <ion-icon name="checkmark-outline"></ion-icon>
+            </div>
+            <div *ngIf="theme.isPremium && theme.id !== 'light'" class="theme-premium">
+              <ion-icon name="flash-outline"></ion-icon>
+            </div>
+          </div>
+        </ng-template>
+
+        <span class="theme-name" [style.color]="theme.vars.text">{{ theme.name }}</span>
+      </button>
+    </div>
+
+    <!-- ══ ACCOUNT ════════════════════════════════════════════════════ -->
+    <div class="section-label">ACCOUNT</div>
+    <div class="pref-card">
+
+      <button class="pref-row pref-row-btn" (click)="changePassword()">
+        <div class="pref-left">
+          <div class="pref-icon-wrap" style="background: color-mix(in srgb, var(--color-primary) 12%, transparent)">
+            <ion-icon name="key-outline" style="color: var(--color-primary)"></ion-icon>
+          </div>
+          <span class="pref-label">Change Password</span>
+        </div>
+        <div class="pref-right">
+          <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+        </div>
+      </button>
+
+      <div class="pref-divider"></div>
+
+      <button class="pref-row pref-row-btn" (click)="openSubscription()">
+        <div class="pref-left">
+          <div class="pref-icon-wrap" style="background: color-mix(in srgb, #FF9500 12%, transparent)">
+            <ion-icon name="card-outline" style="color: #FF9500"></ion-icon>
+          </div>
+          <span class="pref-label">Subscription</span>
+        </div>
+        <div class="pref-right">
+          <span class="pref-value plan-badge">Free</span>
+          <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+        </div>
+      </button>
+
+    </div>
+
+    <!-- ══ PREFERENCES ═════════════════════════════════════════════════ -->
+    <div class="section-label">PREFERENCES</div>
+    <div class="pref-card">
+
+      <div class="pref-row">
+        <div class="pref-left">
+          <div class="pref-icon-wrap" style="background: color-mix(in srgb, var(--color-primary) 12%, transparent)">
+            <ion-icon name="notifications-outline" style="color: var(--color-primary)"></ion-icon>
+          </div>
+          <span class="pref-label">Notifications</span>
+        </div>
+        <button
+          type="button"
+          aria-label="Toggle notifications"
+          class="toggle-btn"
+          [class.on]="notifEnabled()"
+          (click)="toggleNotifications()"
+          role="switch"
+          [attr.aria-checked]="notifEnabled()"
+        >
+          <div class="toggle-thumb"></div>
+        </button>
+      </div>
+
+      <div class="pref-divider"></div>
+
+      <button class="pref-row pref-row-btn" (click)="openNotificationSettings()">
+        <div class="pref-left">
+          <div class="pref-icon-wrap" style="background: color-mix(in srgb, #34C759 12%, transparent)">
+            <ion-icon name="phone-portrait-outline" style="color: #34C759"></ion-icon>
+          </div>
+          <span class="pref-label">Push Notifications</span>
+        </div>
+        <div class="pref-right">
+          <span class="pref-value">Configure</span>
+          <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+        </div>
+      </button>
+
+      <div class="pref-divider"></div>
+
+      <button class="pref-row pref-row-btn" (click)="openTimePicker()">
+        <div class="pref-left">
+          <div class="pref-icon-wrap" style="background: color-mix(in srgb, var(--color-warning) 15%, transparent)">
+            <ion-icon name="time-outline" style="color: var(--color-warning)"></ion-icon>
+          </div>
+          <span class="pref-label">Reminder Time</span>
+        </div>
+        <div class="pref-right">
+          <span class="pref-value">{{ reminderLabel() }}</span>
+          <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+        </div>
+      </button>
+
+      <div class="pref-divider"></div>
+
+      <button class="pref-row pref-row-btn" (click)="openLanguagePicker()">
+        <div class="pref-left">
+          <div class="pref-icon-wrap" style="background: color-mix(in srgb, var(--color-success) 15%, transparent)">
+            <ion-icon name="globe-outline" style="color: var(--color-success)"></ion-icon>
+          </div>
+          <span class="pref-label">Language</span>
+        </div>
+        <div class="pref-right">
+          <span class="pref-value">{{ languageLabel() }}</span>
+          <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+        </div>
+      </button>
+
+    </div>
+
+    <!-- ══ INTEGRATIONS ════════════════════════════════════════════════ -->
+    <div class="section-label">INTEGRATIONS</div>
+    <div class="pref-card">
+
+      <button class="pref-row pref-row-btn" (click)="openGoogleCalendar()">
+        <div class="pref-left">
+          <div class="pref-icon-wrap" style="background: rgba(66,133,244,0.12)">
+            <ion-icon name="logo-google" style="color: #4285F4"></ion-icon>
+          </div>
+          <div>
+            <span class="pref-label">Google Calendar</span>
+            <p class="pref-sublabel">Sync your events</p>
+          </div>
+        </div>
+        <div class="pref-right">
+          <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+        </div>
+      </button>
+
+    </div>
+
+    <!-- ══ DEMOS ════════════════════════════════════════════════════════ -->
+    <div class="section-label">DEMOS</div>
+    <div class="pref-card">
+      <button class="pref-row pref-row-btn" (click)="openWidgetPreview()">
+        <div class="pref-left">
+          <div class="pref-icon-wrap" style="background: #FFF3E0">
+            <ion-icon name="grid-outline" style="color: #FF9500"></ion-icon>
+          </div>
+          <span class="pref-label">Widget Preview</span>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+      </button>
+    </div>
+
+    <!-- ══ ABOUT ════════════════════════════════════════════════════════ -->
+    <div class="section-label">ABOUT</div>
+    <div class="pref-card">
+      <div class="pref-row">
+        <div class="pref-left">
+          <div class="pref-icon-wrap" style="background: color-mix(in srgb, var(--color-text-muted) 12%, transparent)">
+            <ion-icon name="information-circle-outline" style="color: var(--color-text-muted)"></ion-icon>
+          </div>
+          <span class="pref-label">Version</span>
+        </div>
+        <span class="pref-value version-val">{{ appVersion }}</span>
+      </div>
+    </div>
+
+    <!-- ══ DANGER ZONE ══════════════════════════════════════════════════ -->
+    <div class="section-label danger-section-label">DANGER ZONE</div>
+    <div class="pref-card danger-card">
+
+      <button class="pref-row pref-row-btn" (click)="confirmSignOut()">
+        <div class="pref-left">
+          <div class="pref-icon-wrap" style="background: color-mix(in srgb, var(--color-danger) 10%, transparent)">
+            <ion-icon name="log-out-outline" style="color: var(--color-danger)"></ion-icon>
+          </div>
+          <span class="pref-label danger-label">Sign Out</span>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+      </button>
+
+      <div class="pref-divider"></div>
+
+      <button class="pref-row pref-row-btn" (click)="confirmDeleteAccount()">
+        <div class="pref-left">
+          <div class="pref-icon-wrap" style="background: color-mix(in srgb, var(--color-danger) 10%, transparent)">
+            <ion-icon name="trash-outline" style="color: var(--color-danger)"></ion-icon>
+          </div>
+          <div>
+            <span class="pref-label danger-label">Delete Account</span>
+            <p class="pref-sublabel danger-sublabel">Permanently remove your account</p>
+          </div>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+      </button>
+
+    </div>
+
+    <div style="height: 100px"></div>
+
+  </div>
+
+  <!-- ══ MODAL: Sign Out ═══════════════════════════════════════════════ -->
+  @if (showSignOutModal()) {
+    <div class="modal-overlay" (click)="cancelSignOut()">
+      <div class="modal-sheet" (click)="$event.stopPropagation()">
+        <div class="modal-sheet__icon modal-sheet__icon--danger">
+          <ion-icon name="log-out-outline"></ion-icon>
+        </div>
+        <h3 class="modal-sheet__title">Sign Out</h3>
+        <p class="modal-sheet__body">Are you sure you want to sign out?</p>
+        <div class="modal-sheet__actions">
+          <button class="modal-sheet__btn modal-sheet__btn--ghost" (click)="cancelSignOut()">Cancel</button>
+          <button class="modal-sheet__btn modal-sheet__btn--danger" (click)="doSignOut()">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ══ MODAL: Change Password ════════════════════════════════════════ -->
+  @if (showPasswordModal()) {
+    <div class="modal-overlay" (click)="cancelPassword()">
+      <div class="modal-sheet" (click)="$event.stopPropagation()">
+        <div class="modal-sheet__icon modal-sheet__icon--primary">
+          <ion-icon name="key-outline"></ion-icon>
+        </div>
+        <h3 class="modal-sheet__title">Change Password</h3>
+        <p class="modal-sheet__body">
+          A reset link will be sent to <strong>{{ userEmail() }}</strong>.
+        </p>
+        <div class="modal-sheet__actions">
+          <button class="modal-sheet__btn modal-sheet__btn--ghost" (click)="cancelPassword()">Cancel</button>
+          <button class="modal-sheet__btn modal-sheet__btn--primary" (click)="doSendResetLink()">Send Link</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ══ MODAL: Change Theme ═══════════════════════════════════════════ -->
+  @if (showThemeModal()) {
+    <div class="modal-overlay" (click)="cancelTheme()">
+      <div class="modal-sheet" (click)="$event.stopPropagation()">
+        <div class="modal-sheet__icon modal-sheet__icon--primary">
+          <ion-icon name="color-palette-outline"></ion-icon>
+        </div>
+        <h3 class="modal-sheet__title">Change Theme</h3>
+        <p class="modal-sheet__body">
+          Switch to <strong>{{ pendingTheme()?.name }}</strong> theme?
+        </p>
+        <div class="modal-sheet__actions">
+          <button class="modal-sheet__btn modal-sheet__btn--ghost" (click)="cancelTheme()">Cancel</button>
+          <button class="modal-sheet__btn modal-sheet__btn--primary" (click)="applyTheme()">Apply</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ══ MODAL: Subscription ═══════════════════════════════════════════ -->
+  @if (showSubModal()) {
+    <div class="modal-overlay" (click)="cancelSubscription()">
+      <div class="modal-sheet" (click)="$event.stopPropagation()">
+        <div class="modal-sheet__icon modal-sheet__icon--warning">
+          <ion-icon name="flash-outline"></ion-icon>
+        </div>
+        <h3 class="modal-sheet__title">Upgrade to Premium</h3>
+        <p class="modal-sheet__body">
+          You are on the <strong>Free</strong> plan. Upgrade to unlock all themes and features.
+        </p>
+        <div class="modal-sheet__actions">
+          <button class="modal-sheet__btn modal-sheet__btn--ghost" (click)="cancelSubscription()">Maybe Later</button>
+          <button class="modal-sheet__btn modal-sheet__btn--primary" (click)="doUpgrade()">Upgrade</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ══ MODAL: Delete Account ═════════════════════════════════════════ -->
+  @if (showDeleteModal()) {
+    <div class="modal-overlay" (click)="cancelDelete()">
+      <div class="modal-sheet" (click)="$event.stopPropagation()">
+        <div class="modal-sheet__icon modal-sheet__icon--danger">
+          <ion-icon name="trash-outline"></ion-icon>
+        </div>
+        <h3 class="modal-sheet__title">Delete Account</h3>
+        <p class="modal-sheet__body">
+          This is <strong>permanent and irreversible</strong>.<br/>
+          Type your email to confirm:
+        </p>
+        @if (deleteEmailError()) {
+          <p class="modal-sheet__error">{{ deleteEmailError() }}</p>
+        }
+        <input
+          class="modal-sheet__input"
+          type="email"
+          placeholder="your@email.com"
+          [(ngModel)]="deleteEmailInput"
+        />
+        <div class="modal-sheet__actions">
+          <button class="modal-sheet__btn modal-sheet__btn--ghost" (click)="cancelDelete()">Cancel</button>
+          <button class="modal-sheet__btn modal-sheet__btn--danger" (click)="doDeleteAccount()">Delete</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</ion-content>

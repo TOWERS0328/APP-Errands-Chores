@@ -683,3 +683,29 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+// ─── Toast inline ─────────────────────────────────────────────────────────────
+// Agregar al final de task-detail.component.scss y create-task.component.scss
+
+.inline-toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 2000;
+  white-space: nowrap;
+  animation: toastIn 0.25s ease;
+  pointer-events: none;
+
+  &--success { background: #534AB7; color: #fff; }
+  &--warning { background: #F59E0B; color: #fff; }
+  &--error   { background: #EF4444; color: #fff; }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}

@@ -1,3 +1,41 @@
-<p>
-  language-picker works!
-</p>
+<ion-header class="modal-header-bar">
+  <ion-toolbar>
+    <ion-title>
+      <div class="modal-title">
+        <ion-icon name="globe-outline" class="modal-title-icon"></ion-icon>
+        <span>Language</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <button class="modal-btn-icon modal-btn-close" (click)="close()" aria-label="Close">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="picker-content">
+  <div class="modal-handle"></div>
+
+  <p class="modal-subtitle">Select your preferred language</p>
+
+  <div class="language-list" style="padding: 0 16px;">
+    <button
+      *ngFor="let lang of languages"
+      class="modal-list-item"
+      [class.selected]="selected() === lang.code"
+      (click)="selectLanguage(lang.code)"
+    >
+      <span class="lang-flag" style="font-size: 24px; line-height: 1;">{{ lang.flag }}</span>
+      <div class="modal-item-info">
+        <span class="modal-item-title">{{ lang.label }}</span>
+        <span class="modal-item-desc">{{ lang.native }}</span>
+      </div>
+      <ion-icon
+        *ngIf="selected() === lang.code"
+        name="checkmark-outline"
+        class="modal-item-check"
+      ></ion-icon>
+    </button>
+  </div>
+</ion-content>

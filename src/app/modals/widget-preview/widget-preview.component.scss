@@ -1,0 +1,150 @@
+// src/app/modals/widget-preview/widget-preview.component.scss
+:host {
+  display: block;
+}
+
+.widget-header {
+  ion-toolbar {
+    --background: transparent;
+    --border-width: 0;
+    padding-top: 8px;
+  }
+
+  .title-wrap {
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:active {
+      background: var(--color-surface);
+    }
+
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+}
+
+.widget-content {
+  --background: var(--color-bg);
+}
+
+.widget-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 4px;
+  margin: 8px auto 16px;
+}
+
+.widget-subtitle {
+  margin: 0 20px 20px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.widget-list {
+  padding: 0 16px;
+}
+
+.widget-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--color-surface);
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+
+.widget-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.widget-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 22px;
+    color: var(--color-primary);
+  }
+
+  &.enabled {
+    background: var(--color-primary);
+
+    ion-icon {
+      color: white;
+    }
+  }
+}
+
+.widget-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.widget-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.widget-desc {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+// Toggle switch (reutilizable)
+.toggle-btn {
+  width: 50px;
+  height: 30px;
+  border-radius: 15px;
+  background: var(--color-border);
+  border: none;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  padding: 0;
+
+  .toggle-thumb {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: white;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.25s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  &.on {
+    background: var(--color-primary);
+
+    .toggle-thumb {
+      transform: translateX(20px);
+    }
+  }
+}

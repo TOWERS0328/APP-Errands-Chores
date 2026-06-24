@@ -1,5 +1,12 @@
 <div class="detail" @fadeUp>
 
+  <!-- TOAST -->
+  @if (toast()) {
+    <div class="inline-toast inline-toast--{{ toast()!.type }}">
+      <span>{{ toast()!.message }}</span>
+    </div>
+  }
+
   <!-- HEADER -->
   <div class="detail__header">
     <button class="detail__back" (click)="goBack()">
@@ -116,7 +123,6 @@
   <div class="modal-overlay modal-overlay--full" (click)="closeEdit()">
     <div class="edit-modal" (click)="$event.stopPropagation()">
 
-      <!-- Header del modal -->
       <div class="edit-modal__header">
         <button class="edit-modal__back" (click)="editBack()">
           @if (editStep() === 1) {
@@ -133,7 +139,6 @@
         </div>
       </div>
 
-      <!-- STEP 1: Título -->
       @if (editStep() === 1) {
         <div class="edit-modal__body" @slideIn>
           <div class="edit-modal__hero">
@@ -161,7 +166,6 @@
         </div>
       }
 
-      <!-- STEP 2: Descripción -->
       @if (editStep() === 2) {
         <div class="edit-modal__body" @slideIn>
           <div class="edit-modal__hero">
@@ -183,7 +187,6 @@
         </div>
       }
 
-      <!-- STEP 3: Detalles finales -->
       @if (editStep() === 3) {
         <div class="edit-modal__body edit-modal__body--scroll" @slideIn>
 
@@ -191,7 +194,6 @@
             <p class="edit-modal__error">{{ editErrorMsg() }}</p>
           }
 
-          <!-- Prioridad -->
           <p class="edit-modal__label">PRIORITY</p>
           <div class="edit-modal__priority-row">
             <button class="priority-btn priority-btn--high"
@@ -211,7 +213,6 @@
             </button>
           </div>
 
-          <!-- Fecha y hora -->
           <p class="edit-modal__label">DUE DATE</p>
           <div class="edit-modal__date-row">
             <div class="edit-modal__date-input" (click)="editDateInput.showPicker()">
@@ -226,11 +227,16 @@
             </div>
             <div class="edit-modal__date-input" (click)="editTimeInput.showPicker()">
               <ion-icon name="time-outline"></ion-icon>
-              <input #editTimeInput type="time" [(ngModel)]="editDueTime" aria-label="Due time" />
+              <input
+                #editTimeInput
+                type="time"
+                [(ngModel)]="editDueTime"
+                [min]="minTime"
+                aria-label="Due time"
+              />
             </div>
           </div>
 
-          <!-- Tags -->
           <p class="edit-modal__label">TAGS</p>
           <div class="edit-modal__tags">
             @for (tag of availableTags(); track tag.id) {
@@ -263,7 +269,6 @@
             </div>
           }
 
-          <!-- Fotos -->
           <p class="edit-modal__label">PHOTOS</p>
           <div class="edit-modal__photos">
             @for (photo of editPhotos(); track $index) {
@@ -339,7 +344,7 @@
         <div class="postpone-picker__input" (click)="postponeDateInput.showPicker()">
           <ion-icon name="calendar-outline"></ion-icon>
           <input
-          aria-label="Postpone date"
+            aria-label="Postpone date"
             #postponeDateInput
             type="date"
             [ngModel]="postponeDate()"
@@ -356,7 +361,7 @@
         <div class="postpone-picker__input" (click)="postponeTimeInput.showPicker()">
           <ion-icon name="time-outline"></ion-icon>
           <input
-          aria-label="Postpone time"
+            aria-label="Postpone time"
             #postponeTimeInput
             type="time"
             [ngModel]="postponeTime()"

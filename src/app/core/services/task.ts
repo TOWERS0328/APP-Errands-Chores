@@ -3,6 +3,9 @@ import { SupabaseService } from './supabase';
 import { Task, TaskCreate, Priority, TaskStatus } from '../models/task';
 import { FilterOptions } from '../models/app-settings';
 
+const CACHE_KEY = 'tasks_cache';
+const CACHE_TTL = 2 * 60 * 1000; // 2 minutos
+
 @Injectable({ providedIn: 'root' })
 export class TaskService {
   // ── Estado reactivo ─────────────────────────────
@@ -24,7 +27,7 @@ export class TaskService {
   );
 
   todayTasks = computed(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = this.getLocalDateString();
     return this._tasks().filter(t => t.due_date === today);
   });
 
@@ -40,8 +43,57 @@ export class TaskService {
 
   constructor(private supabase: SupabaseService) {}
 
-  // ── Cargar todas las tareas ─────────────────────
+  // ── Fecha local (evita desfase UTC) ────────────
+  private getLocalDateString(date: Date = new Date()): string {
+    const year  = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day   = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // ── Cache helpers ───────────────────────────────
+  private saveCache(userId: string, tasks: Task[]) {
+    try {
+      localStorage.setItem(`${CACHE_KEY}_${userId}`, JSON.stringify({
+        tasks,
+        timestamp: Date.now()
+      }));
+    } catch {}
+  }
+
+  private loadCache(userId: string): Task[] | null {
+    try {
+      const raw = localStorage.getItem(`${CACHE_KEY}_${userId}`);
+      if (!raw) return null;
+      const { tasks, timestamp } = JSON.parse(raw);
+      if (Date.now() - timestamp > CACHE_TTL) return null;
+      return tasks;
+    } catch {
+      return null;
+    }
+  }
+
+  private clearCache(userId: string) {
+    try {
+      localStorage.removeItem(`${CACHE_KEY}_${userId}`);
+    } catch {}
+  }
+
+  // ── Cargar tareas (cache-first) ─────────────────
   async loadTasks(userId: string) {
+    const cached = this.loadCache(userId);
+    if (cached) {
+      this._tasks.set(cached);
+      this._isLoading.set(true);
+      this._error.set(null);
+      void this.refreshTasks(userId);
+      return;
+    }
+
+    await this.refreshTasks(userId);
+  }
+
+  private async refreshTasks(userId: string) {
     this._isLoading.set(true);
     this._error.set(null);
     try {
@@ -64,6 +116,7 @@ export class TaskService {
       }));
 
       this._tasks.set(tasks);
+      this.saveCache(userId, tasks);
     } catch (err: any) {
       this._error.set(err.message);
     } finally {
@@ -93,7 +146,6 @@ export class TaskService {
 
       if (error) throw error;
 
-      // Asociar tags si hay
       if (tagIds.length > 0) {
         const taskTags = tagIds.map(tagId => ({
           task_id: data.id,
@@ -102,8 +154,12 @@ export class TaskService {
         await this.supabase.from('task_tags').insert(taskTags);
       }
 
-      // Actualizar estado local
-      this._tasks.update(tasks => [{ ...data, tags: [] }, ...tasks]);
+      this._tasks.update(tasks => {
+        const updated = [{ ...data, tags: [] }, ...tasks];
+        this.saveCache(userId, updated);
+        return updated;
+      });
+
       return { data, error: null };
     } catch (err: any) {
       this._error.set(err.message);
@@ -114,7 +170,7 @@ export class TaskService {
   }
 
   // ── Actualizar tarea ────────────────────────────
-  async updateTask(id: string, changes: Partial<Task>) {
+  async updateTask(id: string, changes: Partial<Task>, userId?: string) {
     try {
       const { data, error } = await this.supabase
         .from('tasks')
@@ -125,9 +181,12 @@ export class TaskService {
 
       if (error) throw error;
 
-      this._tasks.update(tasks =>
-        tasks.map(t => t.id === id ? { ...t, ...data } : t)
-      );
+      this._tasks.update(tasks => {
+        const updated = tasks.map(t => t.id === id ? { ...t, ...data } : t);
+        if (userId) this.saveCache(userId, updated);
+        return updated;
+      });
+
       return { data, error: null };
     } catch (err: any) {
       return { data: null, error: err.message };
@@ -135,17 +194,17 @@ export class TaskService {
   }
 
   // ── Completar tarea ─────────────────────────────
-  async completeTask(id: string) {
-    return this.updateTask(id, { status: 'completed' });
+  async completeTask(id: string, userId?: string) {
+    return this.updateTask(id, { status: 'completed' }, userId);
   }
 
   // ── Reactivar tarea ─────────────────────────────
-  async reopenTask(id: string) {
-    return this.updateTask(id, { status: 'pending' });
+  async reopenTask(id: string, userId?: string) {
+    return this.updateTask(id, { status: 'pending' }, userId);
   }
 
   // ── Eliminar tarea ──────────────────────────────
-  async deleteTask(id: string) {
+  async deleteTask(id: string, userId?: string) {
     try {
       const { error } = await this.supabase
         .from('tasks')
@@ -154,11 +213,21 @@ export class TaskService {
 
       if (error) throw error;
 
-      this._tasks.update(tasks => tasks.filter(t => t.id !== id));
+      this._tasks.update(tasks => {
+        const updated = tasks.filter(t => t.id !== id);
+        if (userId) this.saveCache(userId, updated);
+        return updated;
+      });
+
       return { error: null };
     } catch (err: any) {
       return { error: err.message };
     }
+  }
+
+  // ── Ocultar completadas del home (para Clear Home) ──
+  hideCompleted() {
+    this._tasks.update(tasks => tasks.filter(t => t.status === 'pending'));
   }
 
   // ── Filtrar tareas ──────────────────────────────
@@ -188,7 +257,8 @@ export class TaskService {
   }
 
   // ── Limpiar estado ──────────────────────────────
-  clearTasks() {
+  clearTasks(userId?: string) {
     this._tasks.set([]);
+    if (userId) this.clearCache(userId);
   }
 }

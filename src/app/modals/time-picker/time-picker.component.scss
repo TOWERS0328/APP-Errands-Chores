@@ -1,0 +1,123 @@
+// src/app/modals/time-picker/time-picker.component.scss
+:host {
+  display: block;
+}
+
+.time-header {
+  ion-toolbar {
+    --background: transparent;
+    --border-width: 0;
+    padding-top: 8px;
+  }
+
+  .title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .title-icon {
+    font-size: 20px;
+    color: var(--color-primary);
+  }
+
+  .close-btn,
+  .confirm-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+
+    &:active {
+      background: var(--color-surface);
+    }
+
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+
+  .close-btn {
+    color: var(--color-text-muted);
+  }
+
+  .confirm-btn {
+    color: var(--color-primary);
+  }
+}
+
+.time-content {
+  --background: var(--color-bg);
+}
+
+.time-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 4px;
+  margin: 8px auto 16px;
+}
+
+.time-subtitle {
+  margin: 0 20px 20px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.time-picker-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 0 16px;
+}
+
+.custom-time-picker {
+  --background: var(--color-surface);
+  --wheel-highlight-background: var(--color-primary);
+  --wheel-highlight-color: white;
+  --wheel-fade-background-rgb: var(--color-bg);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+  &::part(wheel-item) {
+    color: var(--color-text);
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  &::part(wheel-item active) {
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+}
+
+.time-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--color-surface);
+  border-radius: 16px;
+  margin: 24px 16px 0;
+
+  .time-label {
+    font-size: 14px;
+    color: var(--color-text-muted);
+  }
+
+  .time-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-primary);
+    font-variant-numeric: tabular-nums;
+  }
+}

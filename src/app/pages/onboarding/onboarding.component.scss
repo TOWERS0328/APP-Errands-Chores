@@ -41,29 +41,28 @@
 }
 
 .logo-mark {
-  width: 72px;
-  height: 72px;
+  width: 80px;
+  height: 80px;
   border-radius: 20px;
-  background: var(--color-primary, #534AB7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   margin: 0 auto 16px;
-  box-shadow: 0 8px 24px rgba(83, 74, 183, 0.3);
-}
 
-.logo-icon {
-  color: white;
-  font-size: 32px;
-  font-weight: 700;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 }
 
 .app-name {
   font-size: 28px;
   font-weight: 700;
-  color: var(--color-text, #111);
+  color: #F3F4F6;
   letter-spacing: -0.5px;
   margin: 0 0 8px;
+
+  span {
+    color: #7F77DD;
+  }
 }
 
 .app-tagline {

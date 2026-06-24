@@ -1,0 +1,95 @@
+<!-- src/app/modals/custom-theme/custom-theme.component.html -->
+
+<div class="fullscreen-modal">
+
+  <!-- Header -->
+  <div class="fullscreen-modal__header">
+    <button class="fullscreen-modal__close" (click)="close()" aria-label="Close">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+    <span class="fullscreen-modal__title">Custom Theme</span>
+    <button class="fullscreen-modal__action" (click)="resetToDefaults()">Reset</button>
+  </div>
+
+  <!-- Body scrollable -->
+  <div class="fullscreen-modal__body">
+
+    <!-- Preview Card -->
+    <div class="ct-preview" [style.background]="previewVars()['bg'] ?? '#1A1A24'">
+      <div class="ct-preview__header" [style.background]="previewVars()['primary'] ?? '#534AB7'">
+        Preview
+      </div>
+      <div class="ct-preview__body">
+        <div class="ct-preview__item" [style.background]="previewVars()['surface'] ?? 'rgba(255,255,255,0.06)'">
+          <span [style.color]="previewVars()['text'] ?? '#F0F0F0'">Sample text color</span>
+        </div>
+        <div class="ct-preview__actions">
+          <div class="ct-preview__btn" [style.background]="previewVars()['success'] ?? '#34C759'">Success</div>
+          <div class="ct-preview__btn" [style.background]="previewVars()['danger'] ?? '#FF3B30'">Danger</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Color Section -->
+    <div class="ct-section">
+      <p class="ct-section__title">Colors</p>
+
+      <div class="ct-color-list">
+        @for (color of colors(); track color.key) {
+          <div class="ct-color-item" [class.ct-color-item--error]="!!color.error">
+            <div class="ct-color-info">
+              <div class="ct-color-swatch" [style.background]="color.value"></div>
+              <div class="ct-color-labels">
+                <span class="ct-color-name">{{ color.label }}</span>
+                <span class="ct-color-hex" [class.ct-color-hex--error]="!!color.error">
+                  {{ color.error ? color.error : color.value }}
+                </span>
+              </div>
+            </div>
+
+            <div class="ct-color-inputs">
+              <input
+                aria-hidden="true"
+                type="color"
+                [value]="color.value"
+                (input)="updateColor(color.key, $any($event.target).value, true)"
+                class="ct-color-picker"
+              />
+              <input
+                aria-hidden="true"
+                type="text"
+                [value]="color.rawValue"
+                (input)="updateColor(color.key, $any($event.target).value)"
+                class="ct-hex-input"
+                [class.ct-hex-input--invalid]="!!color.error"
+                maxlength="7"
+                placeholder="#RRGGBB"
+              />
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="ct-actions">
+      @if (hasInvalidColors()) {
+        <p class="ct-warning">Fix invalid hex values before saving.</p>
+      }
+      <button class="ct-btn ct-btn--reset" (click)="resetToDefaults()">
+        <ion-icon name="refresh-outline"></ion-icon>
+        Reset to Defaults
+      </button>
+      <button
+        class="ct-btn ct-btn--save"
+        [disabled]="hasInvalidColors()"
+        [class.ct-btn--disabled]="hasInvalidColors()"
+        (click)="confirmSave()"
+      >
+        <ion-icon name="save-outline"></ion-icon>
+        Save Theme
+      </button>
+    </div>
+
+  </div>
+</div>

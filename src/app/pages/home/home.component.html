@@ -14,23 +14,30 @@
             @if (todayCount() > 0) {
               {{ todayCount() }} task{{ todayCount() === 1 ? '' : 's' }} for today
             } @else {
-              All caught up today 🎉
+              All caught up today
             }
           </p>
         </div>
-        <button class="home__bell" aria-label="Notifications">
+        <button class="home__bell" aria-label="Notifications" (click)="openBell()">
           <ion-icon name="notifications-outline"></ion-icon>
+          @if (unreadCount() > 0) {
+            <span class="home__bell-badge">{{ unreadCount() }}</span>
+          }
         </button>
       </div>
-      
     </div>
   </div>
 
-  <!-- FILTER CHIPS -->
-  <div class="home__chips">
-    <button class="chip" [class.chip--active]="activeChip() === 'all'"   (click)="setChip('all')">All</button>
-    <button class="chip" [class.chip--active]="activeChip() === 'today'" (click)="setChip('today')">Today</button>
-    <button class="chip" [class.chip--active]="activeChip() === 'high'"  (click)="setChip('high')">High Priority</button>
+  <!-- FILTER CHIPS + CLEAR BUTTON -->
+  <div class="home__chips-row">
+    <div class="home__chips">
+      <button class="chip" [class.chip--active]="activeChip() === 'all'"   (click)="setChip('all')">All</button>
+      <button class="chip" [class.chip--active]="activeChip() === 'today'" (click)="setChip('today')">Today</button>
+      <button class="chip" [class.chip--active]="activeChip() === 'high'"  (click)="setChip('high')">High Priority</button>
+    </div>
+   <button class="home__clear-btn" (click)="openClearConfirm()" aria-label="Clear home">
+  <ion-icon name="trash-outline"></ion-icon>
+</button>
   </div>
 
   <!-- TASK LIST -->
@@ -40,7 +47,7 @@
         <app-skeleton-card />
       }
     } @else {
-      @let filtered = taskService.tasks() | taskFilter: filters();
+      @let filtered = homeTasks() | taskFilter: filters();
       @if (filtered.length === 0) {
         <app-empty-state
           icon="checkmark-done-outline"
@@ -58,7 +65,128 @@
     }
   </div>
 
+  <!-- HISTORY LINK -->
+  <button class="home__history-btn" (click)="openHistory()">
+    <ion-icon name="time-outline"></ion-icon>
+    View history
+  </button>
+
   <!-- FAB -->
   <app-fab-button (clicked)="openCreate()" />
 
 </div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: CONFIRM CLEAR HOME
+═══════════════════════════════════════════════════════════ -->
+@if (showClearConfirm()) {
+  <div class="modal-overlay" (click)="cancelClear()">
+    <div class="modal-sheet" (click)="$event.stopPropagation()">
+      <div class="modal-sheet__icon modal-sheet__icon--primary">
+        <ion-icon name="trash-outline"></ion-icon>
+      </div>
+      <h3 class="modal-sheet__title">Clear Home?</h3>
+      <p class="modal-sheet__body">
+        Completed tasks will be moved to your <strong>History</strong>. Only pending tasks will remain visible.
+      </p>
+      <div class="modal-sheet__actions">
+        <button class="modal-sheet__btn modal-sheet__btn--ghost" (click)="cancelClear()">Cancel</button>
+        <button class="modal-sheet__btn modal-sheet__btn--primary" (click)="confirmClear()">Clear</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: HISTORY (pantalla completa)
+═══════════════════════════════════════════════════════════ -->
+@if (showHistoryModal()) {
+  <div class="fullscreen-modal">
+    <div class="fullscreen-modal__header">
+      <button class="fullscreen-modal__close" (click)="closeHistory()" aria-label="Close">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+      <span class="fullscreen-modal__title">History</span>
+      <button class="fullscreen-modal__action" (click)="clearHistory()">Clear all</button>
+    </div>
+
+    <div class="fullscreen-modal__body">
+      @if (historyTasks().length === 0) {
+        <div class="fullscreen-modal__empty">
+          <ion-icon name="time-outline"></ion-icon>
+          <p>No history yet</p>
+          <span>Completed tasks will appear here after you clear your home</span>
+        </div>
+      } @else {
+        @for (task of historyTasks(); track task.id) {
+          <div class="history-item">
+            <div class="history-item__icon">
+              <ion-icon name="checkmark-circle"></ion-icon>
+            </div>
+            <div class="history-item__content">
+              <p class="history-item__title">{{ task.title }}</p>
+              @if (task.description) {
+                <p class="history-item__desc">{{ task.description }}</p>
+              }
+              @if (task.due_date) {
+                <p class="history-item__date">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  {{ formatHistoryDate(task.due_date) }}
+                </p>
+              }
+            </div>
+            <span class="history-item__priority history-item__priority--{{ task.priority }}">
+              {{ task.priority }}
+            </span>
+          </div>
+        }
+      }
+    </div>
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: NOTIFICATIONS (pantalla completa con blur)
+═══════════════════════════════════════════════════════════ -->
+@if (showBellModal()) {
+  <div class="blur-overlay" (click)="closeBell()">
+    <div class="fullscreen-modal fullscreen-modal--blur" (click)="$event.stopPropagation()">
+      <div class="fullscreen-modal__header">
+        <button class="fullscreen-modal__close" (click)="closeBell()" aria-label="Close">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+        <span class="fullscreen-modal__title">Notifications</span>
+        @if (notifications().length > 0) {
+          <button class="fullscreen-modal__action" (click)="clearAllNotifications()">Clear all</button>
+        } @else {
+          <span></span>
+        }
+      </div>
+
+      <div class="fullscreen-modal__body">
+        @if (notifications().length === 0) {
+          <div class="fullscreen-modal__empty">
+            <ion-icon name="notifications-off-outline"></ion-icon>
+            <p>No notifications</p>
+            <span>You're all caught up!</span>
+          </div>
+        } @else {
+          @for (notif of notifications(); track notif.id) {
+            <div class="notif-item">
+              <div class="notif-item__icon">
+                <ion-icon [name]="notif.icon"></ion-icon>
+              </div>
+              <div class="notif-item__content">
+                <p class="notif-item__message">{{ notif.message }}</p>
+                <p class="notif-item__time">{{ notif.time }}</p>
+              </div>
+              <button class="notif-item__dismiss" (click)="dismissNotification(notif.id)" aria-label="Dismiss">
+                <ion-icon name="trash-outline"></ion-icon>
+              </button>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}

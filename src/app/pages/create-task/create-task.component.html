@@ -114,6 +114,7 @@
             #dateInput
             type="date"
             [(ngModel)]="dueDate"
+            [min]="minDate"
             aria-label="Select due date"
           />
         </div>
@@ -123,33 +124,78 @@
             #timeInput
             type="time"
             [(ngModel)]="dueTime"
+            [min]="minTime"
             aria-label="Select due time"
           />
         </div>
       </div>
 
       <!-- TAGS -->
-      <p class="create__label">TAGS</p>
+      <div class="create__label-row">
+        <p class="create__label">TAGS</p>
+        <span class="create__tag-counter"
+              [class.create__tag-counter--full]="tagLimitReached()">
+          {{ selectedTagIds().length }}/{{ MAX_TAGS }}
+        </span>
+      </div>
+
+      @if (tagLimitReached()) {
+        <p class="create__tag-limit">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          Max {{ MAX_TAGS }} tags selected
+        </p>
+      }
+
+      <!-- Buscador -->
+      <div class="create__tag-search">
+        <ion-icon name="search-outline"></ion-icon>
+        <input
+          class="create__tag-search-input"
+          type="text"
+          placeholder="e.g. Work, Food, Travel..."
+          [(ngModel)]="tagSearch"
+        />
+        @if (tagSearch) {
+          <button class="create__tag-search-clear" (click)="tagSearch = ''" aria-label="Clear search">
+            <ion-icon name="close-circle-outline"></ion-icon>
+          </button>
+        }
+      </div>
+
+      <!-- Chips -->
       <div class="create__tags">
-        @for (tag of availableTags(); track tag.id) {
+
+        <!-- Tags ya creados por el usuario -->
+        @for (tag of filteredUserTags(); track tag.id) {
           <button
             class="tag-chip"
             [class.tag-chip--selected]="isTagSelected(tag.id)"
+            [class.tag-chip--disabled]="tagLimitReached() && !isTagSelected(tag.id)"
             [style.--tag-color]="tag.color"
-            (click)="toggleTag(tag.id)">
+            (click)="toggleTag(tag.id)"
+            [disabled]="tagLimitReached() && !isTagSelected(tag.id)">
             {{ tag.label }}
           </button>
         }
-        @for (preset of PRESET_TAGS; track preset.label) {
-          @if (isPresetAvailable(preset.label)) {
-            <button class="tag-chip tag-chip--preset" (click)="customTagLabel = preset.label; addCustomTag()">
-              {{ preset.label }}
-            </button>
-          }
+
+        <!-- Presets del catálogo no creados aún — con su color -->
+        @for (preset of filteredPresets(); track preset.label) {
+          <button
+            class="tag-chip tag-chip--preset"
+            [class.tag-chip--disabled]="tagLimitReached()"
+            [style.--tag-color]="preset.color"
+            [disabled]="tagLimitReached()"
+            (click)="addCustomTag(preset.label, preset.color)">
+            {{ preset.label }}
+          </button>
         }
-        <button class="tag-chip tag-chip--add" (click)="showCustomTag.set(!showCustomTag())">
-          <ion-icon name="add-outline"></ion-icon> Other
-        </button>
+
+        <!-- Crear tag personalizado -->
+        @if (!tagLimitReached()) {
+          <button class="tag-chip tag-chip--add" (click)="showCustomTag.set(!showCustomTag())">
+            <ion-icon name="add-outline"></ion-icon> Other
+          </button>
+        }
       </div>
 
       @if (showCustomTag()) {
@@ -159,6 +205,7 @@
             type="text"
             placeholder="Tag name..."
             [(ngModel)]="customTagLabel"
+            (keyup.enter)="addCustomTag()"
           />
           <button class="btn-small" (click)="addCustomTag()">Add</button>
         </div>
@@ -175,9 +222,18 @@
             </button>
           </div>
         }
-        <label class="create__photo-add">
+
+        <!-- Tomar foto con cámara -->
+        <label class="create__photo-add" aria-label="Take photo">
           <ion-icon name="camera-outline"></ion-icon>
-          <span>Add</span>
+          <span>Camera</span>
+          <input type="file" accept="image/*" capture="environment" (change)="pickPhoto($event)" hidden />
+        </label>
+
+        <!-- Elegir de galería -->
+        <label class="create__photo-add" aria-label="Choose from gallery">
+          <ion-icon name="images-outline"></ion-icon>
+          <span>Gallery</span>
           <input type="file" accept="image/*" (change)="pickPhoto($event)" hidden />
         </label>
       </div>
@@ -186,12 +242,8 @@
 
     <div class="create__footer">
       <button class="btn-primary" (click)="save()" [disabled]="saving()">
-        @if (saving()) {
-          <span class="spinner"></span> Saving...
-        } @else {
-          {{ isEditMode() ? 'Update Task' : 'Save Task' }}
-          <ion-icon name="checkmark-outline"></ion-icon>
-        }
+        {{ isEditMode() ? 'Update Task' : 'Save Task' }}
+        <ion-icon name="checkmark-outline"></ion-icon>
       </button>
     </div>
   }

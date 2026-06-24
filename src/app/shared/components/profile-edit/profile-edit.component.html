@@ -1,0 +1,63 @@
+<div class="modal-content">
+
+  <div class="modal-handle"></div>
+
+  <div class="profile-edit-header">
+    <button class="modal-btn-icon modal-btn-close" (click)="dismiss()" aria-label="Cerrar">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+    <h2 class="profile-edit-title">Editar Perfil</h2>
+    <button class="modal-btn-icon modal-btn-confirm" (click)="save()" [disabled]="isSaving()" aria-label="Guardar">
+      <ion-icon name="checkmark-outline"></ion-icon>
+    </button>
+  </div>
+
+  <div class="avatar-section">
+    <div class="avatar-wrap-lg">
+      <img *ngIf="avatarPreview()" [src]="avatarPreview()!" class="avatar-img-lg" alt="avatar" />
+      <div *ngIf="!avatarPreview()" class="avatar-placeholder-lg">{{ avatarLetter() }}</div>
+      <button class="avatar-edit-btn" (click)="showPhotoSheet.set(true)" aria-label="Cambiar foto">
+        <ion-icon name="camera-outline"></ion-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <label class="field-label">NOMBRE</label>
+    <input class="field-input" type="text" [(ngModel)]="displayName" placeholder="Tu nombre" maxlength="40" />
+
+    <label class="field-label">CORREO</label>
+    <input class="field-input" type="email" [value]="email" disabled aria-label="Correo" />
+  </div>
+
+</div>
+
+<!-- ── Photo options sheet ─────────────────────────────────── -->
+@if (showPhotoSheet()) {
+  <div class="photo-overlay" (click)="showPhotoSheet.set(false)">
+    <div class="photo-sheet" (click)="$event.stopPropagation()">
+      <p class="photo-sheet__title">Foto de perfil</p>
+
+      <button class="photo-sheet__btn" (click)="takePhoto('camera')">
+        <ion-icon name="camera-outline"></ion-icon>
+        Tomar foto
+      </button>
+      <div class="photo-sheet__divider"></div>
+      <button class="photo-sheet__btn" (click)="takePhoto('photos')">
+        <ion-icon name="images-outline"></ion-icon>
+        Elegir de galería
+      </button>
+      @if (avatarPreview()) {
+        <div class="photo-sheet__divider"></div>
+        <button class="photo-sheet__btn photo-sheet__btn--danger" (click)="removePhoto()">
+          <ion-icon name="trash-outline"></ion-icon>
+          Quitar foto
+        </button>
+      }
+      <div class="photo-sheet__divider"></div>
+      <button class="photo-sheet__btn photo-sheet__btn--cancel" (click)="showPhotoSheet.set(false)">
+        Cancelar
+      </button>
+    </div>
+  </div>
+}

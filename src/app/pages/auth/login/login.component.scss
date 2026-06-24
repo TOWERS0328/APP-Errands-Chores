@@ -5,7 +5,6 @@
   background: var(--color-bg, #fff);
   padding: 0 24px 40px;
   box-sizing: border-box;
-  
 }
 
 .login-header {
@@ -151,6 +150,7 @@
   box-shadow: 0 4px 14px rgba(83, 74, 183, 0.3);
   transition: transform 0.15s, opacity 0.15s;
   font-family: inherit;
+  width: 100%;
 
   &:disabled {
     opacity: 0.5;
@@ -223,4 +223,161 @@
   color: var(--color-primary, #534AB7);
   font-weight: 600;
   text-decoration: none;
+}
+
+// ── Quick Access ────────────────────────────────
+.quick-access-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.quick-access-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted, #6B7280);
+  letter-spacing: 1px;
+  margin: 0;
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+
+.btn-biometric {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: rgba(124, 111, 205, 0.12);
+  border: 1.5px solid rgba(124, 111, 205, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  padding: 0;
+
+  &:active {
+    background: rgba(124, 111, 205, 0.25);
+    transform: scale(0.94);
+  }
+}
+
+// ── Disable biometric link ──────────────────────
+.btn-disable-biometric {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--color-text-muted, #6B7280);
+  cursor: pointer;
+  font-family: inherit;
+  padding: 4px;
+  text-decoration: underline;
+}
+
+// ── Bottom Sheet ────────────────────────────────
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeBackdrop 0.2s ease;
+}
+
+@keyframes fadeBackdrop {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.sheet-container {
+  width: 100%;
+  background: var(--color-bg, #fff);
+  border-radius: 24px 24px 0 0;
+  padding: 32px 24px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.sheet-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  background: rgba(124, 111, 205, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sheet-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text, #111);
+  margin: 0;
+  text-align: center;
+}
+
+.sheet-message {
+  font-size: 15px;
+  color: var(--color-text-muted, #6B7280);
+  text-align: center;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.btn-sheet-cancel {
+  background: none;
+  border: none;
+  font-size: 15px;
+  color: var(--color-text-muted, #6B7280);
+  cursor: pointer;
+  font-family: inherit;
+  padding: 8px;
+}
+// ── Lock Screen (reapertura de la app con sesión guardada) ──
+.lock-screen {
+  display: flex;
+  flex-direction: column;
+}
+
+.lock-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  padding-top: 40px;
+}
+
+.btn-biometric--lock {
+  width: 96px;
+  height: 96px;
+  border-radius: 28px;
+  margin-bottom: 8px;
+  animation: pulseBio 2s ease-in-out infinite;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    animation: none;
+  }
+}
+
+@keyframes pulseBio {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(124, 111, 205, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(124, 111, 205, 0);
+  }
 }

@@ -1,3 +1,114 @@
-<p>
-  notification-settings works!
-</p>
+<ion-header class="modal-header-bar">
+  <ion-toolbar>
+    <ion-title>
+      <div class="modal-title">
+        <ion-icon name="notifications-outline" class="modal-title-icon"></ion-icon>
+        <span>Notification Settings</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="start">
+      <button class="modal-btn-icon modal-btn-close" (click)="close()" aria-label="Close">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <button class="modal-btn-icon modal-btn-confirm" (click)="confirm()" aria-label="Save settings">
+        <ion-icon name="checkmark-outline"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="notif-content">
+  <div class="modal-handle"></div>
+
+  <p class="modal-subtitle">Manage how you receive notifications</p>
+
+  <!-- Channels -->
+  <div class="modal-section">
+    <h3 class="modal-section-title">Channels</h3>
+
+    <div class="channel-list" style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;">
+      <div *ngFor="let channel of channels()" class="modal-list-item" style="margin-bottom: 0;">
+        <div class="modal-list-item-left">
+          <div class="modal-item-icon-wrap" [class.enabled]="channel.enabled">
+            <ion-icon [name]="channel.icon"></ion-icon>
+          </div>
+          <div class="modal-item-info">
+            <span class="modal-item-title">{{ channel.title }}</span>
+            <span class="modal-item-desc">{{ channel.description }}</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="toggle-switch"
+          [class.on]="channel.enabled"
+          (click)="toggleChannel(channel.id)"
+          role="switch"
+          [attr.aria-checked]="channel.enabled.toString()"
+          [attr.aria-label]="channel.title"
+        >
+          <div class="toggle-thumb"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiet Hours -->
+  <div class="modal-section">
+    <div class="quiet-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+      <div class="modal-list-item-left">
+        <ion-icon name="time-outline" style="font-size: 22px; color: var(--color-warning);"></ion-icon>
+        <div>
+          <h3 class="modal-section-title">Quiet Hours</h3>
+          <p class="modal-section-desc">Pause notifications during these hours</p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="toggle-switch"
+        [class.on]="quietHoursEnabled()"
+        (click)="toggleQuietHours()"
+        role="switch"
+        [attr.aria-checked]="quietHoursEnabled().toString()"
+        aria-label="Quiet hours"
+      >
+        <div class="toggle-thumb"></div>
+      </button>
+    </div>
+
+    <div class="quiet-hours-grid" [class.disabled]="!quietHoursEnabled()" style="display: flex; align-items: center; gap: 12px; transition: opacity 0.2s;">
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+        <label class="time-label">From</label>
+        <input
+          aria-label="Quiet hours start time"
+          type="time"
+          [value]="quietHoursStart()"
+          (change)="setQuietHours('start', $any($event.target).value)"
+          class="time-input-field"
+          [disabled]="!quietHoursEnabled()"
+        />
+      </div>
+      <div style="font-size: 18px; color: var(--color-text-muted); font-weight: 700; padding-top: 20px;">→</div>
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+        <label class="time-label">To</label>
+        <input
+          aria-label="Quiet hours end time"
+          type="time"
+          [value]="quietHoursEnd()"
+          (change)="setQuietHours('end', $any($event.target).value)"
+          class="time-input-field"
+          [disabled]="!quietHoursEnabled()"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Info -->
+  <div class="info-banner">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <p>Push notifications require permission from your device settings.</p>
+  </div>
+</ion-content>
